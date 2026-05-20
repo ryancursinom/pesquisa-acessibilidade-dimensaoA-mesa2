@@ -5,12 +5,12 @@
 
 ## 👥 Integrantes
 
-| Nome | GitHub |
-|------|--------|
-| Gustavo Kenzo Shirahata Ota | [acessar](https://github.com/Gkso31) |
-| Matheus Rezende Nascimento Raimundo | [acessar](https://github.com/MatheussRezende) |
-| Pedro Yada Barbeitos | [acessar](https://github.com/yada071) |
-| Ryan Cursino Moraes | [acessar](https://github.com/ryancursinom) |
+| Nome | GitHub | Área de Atuação |
+|------|--------| --------------- |
+| Gustavo Kenzo Shirahata Ota | [acessar](https://github.com/Gkso31) | Front-End e Design 🎨 |
+| Matheus Rezende Nascimento Raimundo | [acessar](https://github.com/MatheussRezende) | Front-End e Dados 📊 |
+| Pedro Yada Barbeitos | [acessar](https://github.com/yada071) | Back-End ⚙️ |
+| Ryan Cursino Moraes | [acessar](https://github.com/ryancursinom) | Front-End e Dados 📊 |
 
 ---
 
