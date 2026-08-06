@@ -1,0 +1,399 @@
+:root {
+    /* Cores */
+    --primary-gold: #D4AF37;
+    --primary-gold-hover: #B8962E;
+    --bg-dark: #000000;
+    --bg-light: #FFFFFF;
+    --bg-section-grey: #F5F5F5;
+    --text-white: #FFFFFF;
+    --text-dark: #1A1A1A;
+    --text-grey: #666666;
+    --card-bg: #FFFFFF;
+    --border-color: #E0E0E0;
+    --badge-live: #E53935;
+
+    /* Tipografia */
+    --font-main: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    
+    /* Espaçamentos */
+    --container-width: 1200px;
+    --container-wide: 1300px;
+    --section-padding: 80px 20px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-main);
+    line-height: 1.6;
+    color: var(--text-dark);
+    background-color: var(--bg-light);
+    overflow-x: hidden;
+}
+
+/* Correção para evitar fundo claro no scroll na página Sobre Nós */
+.about-page {
+    background-color: #0A0A0A;
+}
+
+.container {
+    max-width: var(--container-width);
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.container--wide {
+    max-width: var(--container-wide);
+}
+
+/* Acessibilidade */
+:focus-visible {
+    outline: 3px solid var(--primary-gold);
+    outline-offset: 2px;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.3s ease;
+}
+
+button {
+    cursor: pointer;
+    border: none;
+    background: none;
+    font-family: inherit;
+    transition: all 0.3s ease;
+}
+
+ul {
+    list-style: none;
+}
+
+img {
+    max-width: 100%;
+    display: block;
+}
+
+/* Navbar */
+.navbar {
+    background-color: var(--bg-dark);
+    color: var(--text-white);
+    padding: 15px 0;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.navbar__content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo img {
+    height: 40px;
+    width: auto;
+}
+
+.nav-links ul {
+    display: flex;
+    gap: 30px;
+}
+
+.nav-links a:hover {
+    color: var(--primary-gold);
+}
+
+.profile-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.profile-btn:hover .profile-img {
+    transform: scale(1.1);
+    filter: brightness(1.2);
+}
+
+/* --- Página Sobre Nós --- */
+
+/* Hero V3 - Dark & Minimalist - Ajuste de Tamanho */
+.about-hero-v3 {
+    padding: 120px 0;
+    background: radial-gradient(circle at center, #1a1a1a 0%, #000000 100%);
+    color: var(--text-white);
+    text-align: center;
+    position: relative;
+}
+
+.hero-v3__content {
+    max-width: 750px;
+    margin: 0 auto;
+}
+
+.hero-v3__subtitle {
+    display: block;
+    color: var(--primary-gold);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin-bottom: 16px;
+    font-size: 13px;
+}
+
+.about-hero-v3 h1 {
+    font-size: 44px; /* Tamanho reduzido para ser mais minimalista */
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 24px;
+}
+
+.about-hero-v3 .highlight {
+    color: var(--primary-gold);
+}
+
+.about-hero-v3 p {
+    font-size: 18px;
+    color: #AAA;
+    line-height: 1.6;
+}
+
+/* Seções Sobre - Fundo Escuro */
+.about-section.dark-bg {
+    background-color: #0A0A0A;
+    color: var(--text-white);
+    padding: 100px 0;
+}
+
+.about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    gap: 80px;
+}
+
+.about-grid--reverse {
+    direction: rtl;
+}
+
+.about-grid--reverse .about-text {
+    direction: ltr;
+}
+
+.about-text h2 {
+    font-size: 36px;
+    font-weight: 800;
+    margin-bottom: 30px;
+    position: relative;
+}
+
+.about-text h2::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 0;
+    width: 60px;
+    height: 4px;
+    background: var(--primary-gold);
+}
+
+.about-text p {
+    font-size: 18px;
+    line-height: 1.8;
+    color: #AAA;
+}
+
+.about-image img {
+    border-radius: 20px;
+    width: 100%;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+}
+
+/* Vantagens V3 - Seção Escura conforme solicitado */
+.advantages-section-v2 {
+    padding: 100px 0;
+    background-color: #0A0A0A; /* Alterado para escuro */
+    color: var(--text-white);
+}
+
+.section-title {
+    text-align: center;
+    font-size: 36px;
+    font-weight: 800;
+    margin-bottom: 60px;
+}
+
+.advantages-grid-v3 {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 30px;
+}
+
+.advantage-card-v2 {
+    flex: 0 1 calc(33.333% - 20px);
+    min-width: 300px;
+    background: #111; /* Fundo do card escuro */
+    padding: 40px;
+    border-radius: 12px;
+    border: 1px solid #222; /* Borda escura */
+    transition: all 0.3s ease;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.advantage-card-v2:hover {
+    border-color: #FFFFFF; /* Borda branca no hover conforme solicitado */
+    background: #1A1A1A;
+    transform: translateY(-8px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+}
+
+.advantage-card--bottom {
+    flex: 0 1 calc(33.333% - 20px);
+}
+
+.advantage-icon-v2 {
+    width: 50px;
+    height: 50px;
+    margin: 0 auto 24px;
+    color: var(--text-white); /* Ícone branco no fundo escuro */
+}
+
+.advantage-icon-v2 svg {
+    width: 100%;
+    height: 100%;
+}
+
+.advantage-card-v2 h3 {
+    font-size: 20px;
+    margin-bottom: 16px;
+    font-weight: 700;
+    color: var(--text-white);
+}
+
+.advantage-card-v2 p {
+    font-size: 15px;
+    color: #888;
+    line-height: 1.6;
+}
+
+/* Testimonials - Seção Clara */
+.testimonials-section {
+    padding: 100px 0;
+    background-color: var(--bg-section-grey);
+    color: var(--text-dark);
+}
+
+.testimonials-section .section-title {
+    color: var(--text-dark);
+}
+
+.testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30px;
+}
+
+.testimonial-card {
+    background: #FFF;
+    padding: 40px;
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    color: var(--text-dark);
+}
+
+.user-name {
+    color: var(--text-dark);
+}
+
+.testimonial-text {
+    color: var(--text-grey);
+}
+
+/* Footer */
+.footer {
+    background: var(--bg-dark);
+    color: var(--text-white);
+    padding: 80px 0 30px;
+    border-top: 1px solid #1A1A1A;
+}
+
+.footer__content {
+    display: flex;
+    justify-content: space-between;
+}
+
+.logo--gold {
+    color: var(--primary-gold);
+    font-size: 36px;
+    font-weight: 800;
+    margin-bottom: 24px;
+}
+
+.footer__links {
+    display: flex;
+    gap: 80px;
+}
+
+.footer__column h3 {
+    font-size: 18px;
+    margin-bottom: 24px;
+}
+
+.footer__column a {
+    color: #888;
+    font-size: 14px;
+}
+
+.footer__bottom {
+    text-align: center;
+    padding-top: 40px;
+    border-top: 1px solid #1A1A1A;
+    color: #444;
+}
+
+/* Responsividade */
+@media (max-width: 992px) {
+    .about-grid {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+    .about-hero-v3 h1 {
+        font-size: 36px;
+    }
+    .advantages-grid-v3 {
+        grid-template-columns: 1fr;
+    }
+    .advantage-card-v2, .advantage-card--bottom {
+        grid-column: span 1;
+        flex: 1 1 100%;
+    }
+    .testimonials-grid {
+        grid-template-columns: 1fr;
+    }
+    .about-grid--reverse {
+        direction: ltr;
+    }
+}
