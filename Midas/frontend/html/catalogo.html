@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Catálogo de leilões e produtos de compra imediata do Midas.">
+    <title>Catálogo - Midas</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/catalogo.css">
+</head>
+<body class="dark-page catalog-page" data-root=".." data-page="catalogo">
+    <a class="skip-link" href="#conteudo-principal">Pular para o conteúdo principal</a>
+    <header class="navbar" data-site-header></header>
+
+    <main id="conteudo-principal" class="page-shell" tabindex="-1">
+        <div class="container">
+            <header class="page-heading">
+                <h1>Catálogo de Leilões</h1>
+                <p>Aqui você encontra itens leiloados e produtos de compra imediata em diversas categorias.</p>
+            </header>
+
+            <form id="catalog-search-form" class="filters-panel" role="search" novalidate>
+                <div class="form-field search-row">
+                    <label class="sr-only" for="catalog-search">Buscar no catálogo</label>
+                    <input id="catalog-search" class="search-input" name="search" type="search" placeholder="Busque por nome, categoria ou marca" autocomplete="off">
+                </div>
+                <div class="form-field">
+                    <label for="catalog-sort">Ordenar por</label>
+                    <select id="catalog-sort" name="sort">
+                        <option value="ending">Tempo para acabar</option>
+                        <option value="price-asc">Menor preço</option>
+                        <option value="price-desc">Maior preço</option>
+                        <option value="title">Nome</option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label for="catalog-sale-type">Tipo de compra</label>
+                    <select id="catalog-sale-type" name="saleType">
+                        <option value="all">Todos</option>
+                        <option value="AUCTION">Leilão</option>
+                        <option value="BUY_NOW">Compra imediata</option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label for="catalog-status">Status</label>
+                    <select id="catalog-status" name="status">
+                        <option value="all">Todos</option>
+                        <option value="ACTIVE">Ao vivo</option>
+                        <option value="CLOSED">Encerrado</option>
+                    </select>
+                </div>
+            </form>
+
+            <p id="catalog-result-summary" class="category-summary" role="status" aria-live="polite"></p>
+            <div id="catalog-content" class="catalog-sections" aria-live="polite"></div>
+        </div>
+    </main>
+
+    <footer class="footer" data-site-footer></footer>
+    <script type="module" src="../js/main.js"></script>
+    <script type="module" src="../js/pages/catalogo.js"></script>
+</body>
+</html>

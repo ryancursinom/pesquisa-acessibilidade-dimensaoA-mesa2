@@ -1,0 +1,32 @@
+.catalog-page {
+    background: var(--bg-dark);
+    color: var(--text-white);
+}
+
+.catalog-sections {
+    display: grid;
+    gap: 64px;
+}
+
+.catalog-category-block {
+    display: grid;
+    gap: 24px;
+}
+
+.catalog-category-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.catalog-category-header h2 {
+    font-size: 1.65rem;
+}
+
+.catalog-category-link {
+    color: var(--primary-gold);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}

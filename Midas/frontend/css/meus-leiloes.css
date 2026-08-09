@@ -1,0 +1,9 @@
+.my-auctions-page {
+    background: var(--bg-dark);
+    color: var(--text-white);
+}
+
+.my-auctions-count {
+    margin: 18px 0 28px;
+    color: var(--text-muted-dark);
+}

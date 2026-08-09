@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurações - Midas</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/configuracoes.css">
+</head>
+<body class="dark-page settings-page" data-root=".." data-page="perfil">
+    <a class="skip-link" href="#conteudo-principal">Pular para o conteúdo principal</a>
+    <header class="navbar" data-site-header></header>
+
+    <main id="conteudo-principal" class="page-shell" tabindex="-1">
+        <div class="container">
+            <header class="page-heading">
+                <h1>Configurações</h1>
+                <p>Personalize a experiência visual e de acessibilidade. As escolhas ficam salvas neste navegador.</p>
+            </header>
+
+            <section class="settings-card" aria-labelledby="display-settings-title">
+                <h2 id="display-settings-title">Aparência e acessibilidade</h2>
+                <form id="settings-form" novalidate>
+                    <div class="settings-form-grid">
+                        <div class="settings-field">
+                            <label for="settings-theme">Tema</label>
+                            <select id="settings-theme" name="theme">
+                                <option value="dark">Escuro</option>
+                                <option value="light">Claro</option>
+                            </select>
+                        </div>
+                        <div class="settings-field">
+                            <label for="settings-contrast">Contraste</label>
+                            <select id="settings-contrast" name="contrast">
+                                <option value="normal">Normal</option>
+                                <option value="high">Alto contraste</option>
+                            </select>
+                        </div>
+                        <div class="settings-field">
+                            <label for="settings-font-size">Tamanho da fonte</label>
+                            <select id="settings-font-size" name="fontSize">
+                                <option value="small">Pequena</option>
+                                <option value="medium">Média</option>
+                                <option value="large">Grande</option>
+                                <option value="xlarge">Muito grande</option>
+                            </select>
+                        </div>
+                        <div class="settings-field">
+                            <label for="settings-color-vision">Ajuste de cores</label>
+                            <select id="settings-color-vision" name="colorVision">
+                                <option value="none">Padrão</option>
+                                <option value="protanopia">Protanopia</option>
+                                <option value="deuteranopia">Deuteranopia</option>
+                                <option value="tritanopia">Tritanopia</option>
+                            </select>
+                        </div>
+                        <div class="settings-field">
+                            <label for="settings-language">Idioma</label>
+                            <select id="settings-language" name="language">
+                                <option value="pt-BR">Português (Brasil)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="settings-checkboxes">
+                        <label class="checkbox-row" for="settings-reduce-motion">
+                            <input id="settings-reduce-motion" name="reduceMotion" type="checkbox">
+                            <span>Reduzir animações e movimentos</span>
+                        </label>
+                    </div>
+                    <p class="settings-note">O idioma disponível neste MVP é Português (Brasil). A configuração já está preparada para receber novas traduções sem alterar a estrutura das páginas.</p>
+                    <div class="form-actions">
+                        <button class="btn-primary" type="submit">Salvar configurações</button>
+                        <button id="reset-settings" class="btn-secondary" type="button">Restaurar padrão</button>
+                    </div>
+                    <p id="settings-status" class="form-status" role="status" aria-live="polite"></p>
+                </form>
+            </section>
+        </div>
+    </main>
+
+    <footer class="footer" data-site-footer></footer>
+    <script type="module" src="../js/main.js"></script>
+    <script type="module" src="../js/pages/configuracoes.js"></script>
+</body>
+</html>

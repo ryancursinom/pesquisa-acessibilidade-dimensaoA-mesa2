@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Detalhes de um item disponível no Midas.">
+    <title>Detalhes do Leilão - Midas</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/detalhes-leilao.css">
+</head>
+<body class="dark-page details-page" data-root=".." data-page="catalogo">
+    <a class="skip-link" href="#conteudo-principal">Pular para o conteúdo principal</a>
+    <header class="navbar" data-site-header></header>
+
+    <main id="conteudo-principal" class="page-shell" tabindex="-1">
+        <div class="container">
+            <div id="details-state" aria-live="polite"></div>
+            <div id="details-content" hidden>
+                <div class="details-layout">
+                    <section class="details-gallery" aria-labelledby="gallery-title">
+                        <h1 id="gallery-title" class="sr-only">Galeria do item</h1>
+                        <div class="details-main-image">
+                            <img id="details-main-image" src="../assets/img/item-default.svg" alt="">
+                        </div>
+                        <div id="details-thumbnails" class="thumbnail-list" aria-label="Miniaturas da galeria"></div>
+                    </section>
+
+                    <article class="details-panel">
+                        <p id="details-category" class="details-kicker"></p>
+                        <h1 id="details-title"></h1>
+                        <p id="details-description"></p>
+                        <dl class="details-meta">
+                            <div><dt>Estado</dt><dd id="details-condition"></dd></div>
+                            <div><dt>Encerramento</dt><dd id="details-ends-at"></dd></div>
+                            <div><dt>Marca</dt><dd id="details-brand"></dd></div>
+                            <div><dt>Vendedor</dt><dd id="details-seller"></dd></div>
+                        </dl>
+                        <div class="details-price">
+                            <span id="details-price-label">Lance atual</span>
+                            <strong id="details-price"></strong>
+                        </div>
+                        <div id="details-primary-action"></div>
+                        <p id="details-action-status" class="form-status" role="status" aria-live="polite"></p>
+                    </article>
+                </div>
+
+                <section id="bid-section" class="bid-section" aria-labelledby="bid-title">
+                    <header class="section-heading"><h2 id="bid-title">Dar um novo lance</h2></header>
+                    <form id="bid-form" class="form-grid" novalidate>
+                        <div class="form-field">
+                            <label for="bid-amount">Valor do lance</label>
+                            <input id="bid-amount" name="amount" type="number" min="0.01" step="0.01" inputmode="decimal" aria-describedby="bid-amount-error">
+                            <span id="bid-amount-error" class="field-error" aria-live="polite"></span>
+                        </div>
+                        <div class="form-actions">
+                            <button class="btn-primary" type="submit">Dar Lance</button>
+                        </div>
+                    </form>
+                </section>
+
+                <section class="bid-history-section" aria-labelledby="bid-history-title">
+                    <header class="section-heading"><h2 id="bid-history-title">Histórico de lances</h2></header>
+                    <div id="bid-history" class="bid-history-list" aria-live="polite"></div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <dialog id="bid-confirm-dialog" class="midas-dialog" aria-labelledby="bid-confirm-title">
+        <h2 id="bid-confirm-title">Confirmar lance</h2>
+        <p id="bid-confirm-message"></p>
+        <div class="dialog-actions">
+            <button class="btn-secondary" type="button" data-dialog-close>Cancelar</button>
+            <button id="bid-confirm-button" class="btn-primary" type="button">Confirmar Lance</button>
+        </div>
+    </dialog>
+
+    <footer class="footer" data-site-footer></footer>
+    <script type="module" src="../js/main.js"></script>
+    <script type="module" src="../js/pages/detalhes-leilao.js"></script>
+</body>
+</html>

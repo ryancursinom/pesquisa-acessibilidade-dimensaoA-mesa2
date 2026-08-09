@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar Leilão - Midas</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/criar-leilao.css">
+</head>
+<body class="dark-page create-auction-page" data-root=".." data-page="meus-leiloes">
+    <a class="skip-link" href="#conteudo-principal">Pular para o conteúdo principal</a>
+    <header class="navbar" data-site-header></header>
+
+    <main id="conteudo-principal" class="page-shell" tabindex="-1">
+        <div class="container">
+            <header class="page-heading">
+                <h1 id="create-auction-title">Criar Leilão</h1>
+                <p>Cadastre um item com informações claras para que os compradores saibam exatamente o que está sendo ofertado.</p>
+            </header>
+
+            <form id="create-auction-form" class="create-auction-form" enctype="multipart/form-data" novalidate>
+                <div class="form-grid">
+                    <div class="form-field">
+                        <label for="auction-name">Nome do item</label>
+                        <input id="auction-name" name="name" type="text" required aria-describedby="auction-name-error">
+                        <span id="auction-name-error" class="field-error" aria-live="polite"></span>
+                    </div>
+                    <div class="form-field">
+                        <label for="auction-category">Categoria</label>
+                        <select id="auction-category" name="category" required aria-describedby="auction-category-error">
+                            <option value="">Selecione</option>
+                            <option value="Jogos Eletrônicos">Jogos Eletrônicos</option>
+                            <option value="Cards Colecionáveis">Cards Colecionáveis</option>
+                            <option value="Itens Esportivos">Itens Esportivos</option>
+                            <option value="Action Figures">Action Figures</option>
+                            <option value="Automóveis">Automóveis</option>
+                            <option value="Imóveis">Imóveis</option>
+                            <option value="Aparelhos Eletrônicos">Aparelhos Eletrônicos</option>
+                        </select>
+                        <span id="auction-category-error" class="field-error" aria-live="polite"></span>
+                    </div>
+                    <div class="form-field form-field--full">
+                        <label for="auction-description">Descrição</label>
+                        <textarea id="auction-description" name="description" rows="6" required aria-describedby="auction-description-error"></textarea>
+                        <span id="auction-description-error" class="field-error" aria-live="polite"></span>
+                    </div>
+                    <div class="form-field">
+                        <label for="auction-sale-type">Tipo de venda</label>
+                        <select id="auction-sale-type" name="saleType">
+                            <option value="AUCTION">Leilão</option>
+                            <option value="BUY_NOW">Compra imediata</option>
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label for="auction-value">Valor inicial ou preço fixo</label>
+                        <input id="auction-value" name="value" type="number" min="0.01" step="0.01" inputmode="decimal" required aria-describedby="auction-value-error">
+                        <span id="auction-value-error" class="field-error" aria-live="polite"></span>
+                    </div>
+                    <div class="form-field">
+                        <label for="auction-end-date">Data de encerramento</label>
+                        <input id="auction-end-date" name="endDate" type="datetime-local" required aria-describedby="auction-end-date-error">
+                        <span id="auction-end-date-error" class="field-error" aria-live="polite"></span>
+                    </div>
+                    <div class="form-field">
+                        <label for="auction-condition">Estado do item</label>
+                        <select id="auction-condition" name="condition" required aria-describedby="auction-condition-error">
+                            <option value="">Selecione</option>
+                            <option value="Novo">Novo</option>
+                            <option value="Excelente">Excelente</option>
+                            <option value="Bom">Bom</option>
+                            <option value="Usado">Usado</option>
+                        </select>
+                        <span id="auction-condition-error" class="field-error" aria-live="polite"></span>
+                    </div>
+                    <div class="form-field">
+                        <label for="auction-brand">Marca</label>
+                        <input id="auction-brand" name="brand" type="text">
+                    </div>
+                    <div class="form-field">
+                        <label for="auction-rarity">Raridade</label>
+                        <input id="auction-rarity" name="rarity" type="text">
+                    </div>
+                    <div class="form-field form-field--full">
+                        <label for="auction-images">Imagens</label>
+                        <input id="auction-images" name="images" type="file" accept="image/*" multiple required aria-describedby="auction-images-help auction-images-error">
+                        <p id="auction-images-help" class="form-help">Selecione imagens nítidas do item. O primeiro arquivo será usado como imagem principal.</p>
+                        <span id="auction-images-error" class="field-error" aria-live="polite"></span>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button class="btn-primary" type="submit">Publicar item</button>
+                    <a class="btn-secondary" href="meus-leiloes.html?aba=criados">Cancelar</a>
+                </div>
+                <p id="create-auction-status" class="form-status" role="status" aria-live="polite"></p>
+            </form>
+        </div>
+    </main>
+
+    <footer class="footer" data-site-footer></footer>
+    <script type="module" src="../js/main.js"></script>
+    <script type="module" src="../js/pages/criar-leilao.js"></script>
+</body>
+</html>
