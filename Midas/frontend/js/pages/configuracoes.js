@@ -1,4 +1,5 @@
 import { setLiveMessage } from '../components/statusMessage.js';
+import { t } from '../services/i18n.js';
 import { getSettings, resetSettings, saveSettings } from '../services/settingsService.js';
 
 const form = document.getElementById('settings-form');
@@ -24,16 +25,28 @@ function readForm() {
     };
 }
 
+function reloadForLanguageChange(previousLanguage, nextLanguage) {
+    if (previousLanguage === nextLanguage) return false;
+    window.location.reload();
+    return true;
+}
+
 form.addEventListener('submit', (event) => {
     event.preventDefault();
-    saveSettings(readForm());
-    setLiveMessage(status, 'Configurações salvas.');
+    const previousLanguage = getSettings().language;
+    const settings = saveSettings(readForm());
+    if (!reloadForLanguageChange(previousLanguage, settings.language)) {
+        setLiveMessage(status, t('Configurações salvas.'));
+    }
 });
 
 document.getElementById('reset-settings').addEventListener('click', () => {
+    const previousLanguage = getSettings().language;
     const settings = resetSettings();
     populateForm(settings);
-    setLiveMessage(status, 'Configurações restauradas para o padrão.');
+    if (!reloadForLanguageChange(previousLanguage, settings.language)) {
+        setLiveMessage(status, t('Configurações restauradas para o padrão.'));
+    }
 });
 
 populateForm(getSettings());

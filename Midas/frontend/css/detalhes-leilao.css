@@ -149,3 +149,15 @@
         grid-template-columns: 1fr;
     }
 }
+
+.auction-action-layout { display: grid; grid-template-columns: minmax(0,1fr) minmax(260px,.8fr); gap: 18px; align-items: end; }
+.bid-form { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 14px; align-items: end; }
+.bid-form .form-field { min-width: 0; }
+.bid-form .btn-primary { min-height: 46px; }
+.buy-now-action { display: grid; }
+.buy-now-action .btn-primary { min-height: 46px; background: #F0D15A; border-color: #F0D15A; }
+.buy-now-action .btn-primary:hover { background: #FFE07A; }
+.details-buy-now-info { padding: 12px 14px; border: 1px solid #7B6417; border-radius: 9px; background: #2A230A; color: #F5E7A3; }
+html[data-theme='light'] .details-price, html[data-theme='light'] .details-buy-now-info { background: #FFF2BE; color: #3F3100; }
+html[data-theme='light'] .details-price span, html[data-theme='light'] .details-price strong { color: #4B3A00; }
+@media (max-width: 760px) { .auction-action-layout, .bid-form { grid-template-columns: 1fr; } }

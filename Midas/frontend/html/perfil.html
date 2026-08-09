@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="../assets/img/favicon.svg">
     <title>Perfil - Midas</title>
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="../css/perfil.css">
@@ -15,9 +16,10 @@
         <div class="profile-layout">
             <aside class="profile-sidebar" aria-label="Navegação do perfil">
                 <h1>Perfil de usuário</h1>
-                <a href="perfil.html" aria-current="page">👤 Informações de usuário</a>
-                <a href="configuracoes.html">⚙ Configurações</a>
-                <button id="logout-button" class="logout-button" type="button">↪ Sair da conta</button>
+                <a href="perfil.html" aria-current="page"><span data-icon="user" aria-hidden="true"></span>Informações de usuário</a>
+                <a href="configuracoes.html"><span data-icon="settings" aria-hidden="true"></span>Configurações</a>
+                <a href="loja-oficial.html"><span data-icon="package" aria-hidden="true"></span>Loja Oficial Midas</a>
+                <button id="logout-button" class="logout-button" type="button"><span data-icon="logout" aria-hidden="true"></span>Sair da conta</button>
             </aside>
 
             <section class="profile-content" aria-labelledby="profile-name-heading">
@@ -32,48 +34,20 @@
                     </header>
 
                     <form id="profile-form" class="profile-form" novalidate>
-                        <div class="form-field">
-                            <label for="profile-name">Nome</label>
-                            <input id="profile-name" name="name" type="text" autocomplete="name" required aria-describedby="profile-name-error">
-                            <span id="profile-name-error" class="field-error" aria-live="polite"></span>
-                        </div>
-                        <div class="form-field">
-                            <label for="profile-email">E-mail</label>
-                            <input id="profile-email" name="email" type="email" autocomplete="email" required aria-describedby="profile-email-error">
-                            <span id="profile-email-error" class="field-error" aria-live="polite"></span>
-                        </div>
-                        <div class="form-field">
-                            <label for="profile-city">Cidade</label>
-                            <input id="profile-city" name="city" type="text" autocomplete="address-level2" aria-describedby="profile-city-error">
-                            <span id="profile-city-error" class="field-error" aria-live="polite"></span>
-                        </div>
-                        <div class="form-field">
-                            <label for="profile-country">País</label>
-                            <input id="profile-country" name="country" type="text" autocomplete="country-name" aria-describedby="profile-country-error">
-                            <span id="profile-country-error" class="field-error" aria-live="polite"></span>
-                        </div>
-                        <div class="form-actions">
-                            <button class="btn-primary" type="submit">Salvar alterações</button>
-                        </div>
+                        <div class="form-field"><label for="profile-name">Nome</label><input id="profile-name" name="name" type="text" autocomplete="name" required aria-describedby="profile-name-error"><span id="profile-name-error" class="field-error" aria-live="polite"></span></div>
+                        <div class="form-field"><label for="profile-email">E-mail</label><input id="profile-email" name="email" type="email" autocomplete="email" required aria-describedby="profile-email-error"><span id="profile-email-error" class="field-error" aria-live="polite"></span></div>
+                        <div class="form-field"><label for="profile-city">Cidade</label><input id="profile-city" name="city" type="text" autocomplete="address-level2" aria-describedby="profile-city-error"><span id="profile-city-error" class="field-error" aria-live="polite"></span></div>
+                        <div class="form-field"><label for="profile-country">País</label><input id="profile-country" name="country" type="text" autocomplete="country-name" aria-describedby="profile-country-error"><span id="profile-country-error" class="field-error" aria-live="polite"></span></div>
+                        <div class="form-actions"><button class="btn-primary" type="submit">Salvar alterações</button></div>
                         <p id="profile-form-status" class="form-status" role="status" aria-live="polite"></p>
                     </form>
 
                     <section class="profile-form" aria-labelledby="password-title">
                         <h2 id="password-title">Alterar senha</h2>
                         <form id="password-form" class="profile-form" novalidate>
-                            <div class="form-field">
-                                <label for="current-password">Senha atual</label>
-                                <input id="current-password" name="currentPassword" type="password" autocomplete="current-password" required aria-describedby="current-password-error">
-                                <span id="current-password-error" class="field-error" aria-live="polite"></span>
-                            </div>
-                            <div class="form-field">
-                                <label for="new-password">Nova senha</label>
-                                <input id="new-password" name="newPassword" type="password" autocomplete="new-password" required aria-describedby="new-password-error">
-                                <span id="new-password-error" class="field-error" aria-live="polite"></span>
-                            </div>
-                            <div class="form-actions">
-                                <button class="btn-secondary" type="submit">Atualizar senha</button>
-                            </div>
+                            <div class="form-field"><label for="current-password">Senha atual</label><input id="current-password" name="currentPassword" type="password" autocomplete="current-password" required aria-describedby="current-password-error"><span id="current-password-error" class="field-error" aria-live="polite"></span></div>
+                            <div class="form-field"><label for="new-password">Nova senha</label><input id="new-password" name="newPassword" type="password" autocomplete="new-password" required aria-describedby="new-password-error"><span id="new-password-error" class="field-error" aria-live="polite"></span></div>
+                            <div class="form-actions"><button class="btn-secondary" type="submit">Atualizar senha</button></div>
                             <p id="password-status" class="form-status" role="status" aria-live="polite"></p>
                         </form>
                     </section>

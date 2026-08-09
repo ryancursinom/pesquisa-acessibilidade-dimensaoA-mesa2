@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Detalhes de um item disponível no Midas.">
+    <link rel="icon" type="image/svg+xml" href="../assets/img/favicon.svg">
     <title>Detalhes do Leilão - Midas</title>
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="../css/detalhes-leilao.css">
@@ -30,7 +31,7 @@
                         <h1 id="details-title"></h1>
                         <p id="details-description"></p>
                         <dl class="details-meta">
-                            <div><dt>Estado</dt><dd id="details-condition"></dd></div>
+                            <div><dt>Condição</dt><dd id="details-condition"></dd></div>
                             <div><dt>Encerramento</dt><dd id="details-ends-at"></dd></div>
                             <div><dt>Marca</dt><dd id="details-brand"></dd></div>
                             <div><dt>Vendedor</dt><dd id="details-seller"></dd></div>
@@ -39,23 +40,24 @@
                             <span id="details-price-label">Lance atual</span>
                             <strong id="details-price"></strong>
                         </div>
-                        <div id="details-primary-action"></div>
+                        <div id="details-buy-now-info" class="details-buy-now-info" hidden></div>
                         <p id="details-action-status" class="form-status" role="status" aria-live="polite"></p>
                     </article>
                 </div>
 
                 <section id="bid-section" class="bid-section" aria-labelledby="bid-title">
-                    <header class="section-heading"><h2 id="bid-title">Dar um novo lance</h2></header>
-                    <form id="bid-form" class="form-grid" novalidate>
-                        <div class="form-field">
-                            <label for="bid-amount">Valor do lance</label>
-                            <input id="bid-amount" name="amount" type="number" min="0.01" step="0.01" inputmode="decimal" aria-describedby="bid-amount-error">
-                            <span id="bid-amount-error" class="field-error" aria-live="polite"></span>
-                        </div>
-                        <div class="form-actions">
+                    <header class="section-heading"><h2 id="bid-title">Participar do leilão</h2></header>
+                    <div class="auction-action-layout">
+                        <form id="bid-form" class="bid-form" novalidate>
+                            <div class="form-field">
+                                <label for="bid-amount">Valor do lance</label>
+                                <div class="currency-field"><span class="currency-prefix" aria-hidden="true">R$</span><input id="bid-amount" name="amount" type="number" min="0.01" step="10" inputmode="decimal" aria-describedby="bid-amount-error"></div>
+                                <span id="bid-amount-error" class="field-error" aria-live="polite"></span>
+                            </div>
                             <button class="btn-primary" type="submit">Dar Lance</button>
-                        </div>
-                    </form>
+                        </form>
+                        <div id="buy-now-action" class="buy-now-action" hidden></div>
+                    </div>
                 </section>
 
                 <section class="bid-history-section" aria-labelledby="bid-history-title">
@@ -72,6 +74,15 @@
         <div class="dialog-actions">
             <button class="btn-secondary" type="button" data-dialog-close>Cancelar</button>
             <button id="bid-confirm-button" class="btn-primary" type="button">Confirmar Lance</button>
+        </div>
+    </dialog>
+
+    <dialog id="buy-now-confirm-dialog" class="midas-dialog" aria-labelledby="buy-now-confirm-title">
+        <h2 id="buy-now-confirm-title">Confirmar Compra Imediata</h2>
+        <p id="buy-now-confirm-message"></p>
+        <div class="dialog-actions">
+            <button class="btn-secondary" type="button" data-dialog-close>Cancelar</button>
+            <button id="buy-now-confirm-button" class="btn-primary" type="button">Comprar Agora</button>
         </div>
     </dialog>
 

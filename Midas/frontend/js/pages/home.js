@@ -1,9 +1,10 @@
 import { createAuctionCard } from '../components/auctionCard.js';
 import { appendChildren, clearElement, createElement } from '../components/dom.js';
+import { getUserErrorMessage } from '../components/userError.js';
 import { renderState } from '../components/statusMessage.js';
 import { getAuctions, setFavorite } from '../services/auctionService.js';
 import { normalizeCollection } from '../services/api.js';
-import { addToCart } from '../services/cartService.js';
+import { t } from '../services/i18n.js';
 
 const featuredGrid = document.getElementById('featured-grid');
 const endingGrid = document.getElementById('ending-grid');
@@ -16,7 +17,7 @@ let auctions = [];
 function renderAuctionList(container, items, emptyMessage) {
     clearElement(container);
     if (!items.length) {
-        renderState(container, 'empty', emptyMessage);
+        renderState(container, 'empty', t(emptyMessage));
         return;
     }
     items.forEach((auction) => container.appendChild(createAuctionCard(auction, { showFavorite: true })));
@@ -25,7 +26,7 @@ function renderAuctionList(container, items, emptyMessage) {
 function getFeatured(items) {
     return [...items]
         .filter((item) => item.status !== 'CLOSED')
-        .sort((a, b) => Number(b.currentBid || b.price || 0) - Number(a.currentBid || a.price || 0))
+        .sort((a, b) => Number(b.currentBid || b.startingBid || 0) - Number(a.currentBid || a.startingBid || 0))
         .slice(0, 3);
 }
 
@@ -46,20 +47,29 @@ function getCategoryCounts(items) {
 
 function renderCategories(items) {
     clearElement(categoriesGrid);
-    const categories = [...getCategoryCounts(items).entries()].sort((a, b) => b[1] - a[1]).slice(0, 6);
+    const categories = [...getCategoryCounts(items).entries()].sort((a, b) => b[1] - a[1]).slice(0, 7);
     if (!categories.length) {
-        renderState(categoriesGrid, 'empty', 'As categorias aparecerão quando houver itens disponíveis.');
+        renderState(categoriesGrid, 'empty', t('As categorias aparecerão quando houver itens disponíveis.'));
         return;
     }
     categories.forEach(([category, count]) => {
         const card = createElement('article', { className: 'category-card' });
         appendChildren(card, [
-            createElement('h3', { text: category }),
-            createElement('p', { text: `${count} item(ns) disponível(is) nesta categoria.` }),
-            createElement('a', { text: 'Navegar na categoria', attrs: { href: `html/categoria.html?categoria=${encodeURIComponent(category)}` } })
+            createElement('h3', { text: t(category) }),
+            createElement('p', { text: t('Itens disponíveis: {count}', { count }) }),
+            createElement('a', {
+                text: t('Navegar na categoria'),
+                attrs: { href: `html/categoria.html?categoria=${encodeURIComponent(category)}` }
+            })
         ]);
         categoriesGrid.appendChild(card);
     });
+}
+
+function updateCarouselControls() {
+    const maxScrollLeft = Math.max(0, endingGrid.scrollWidth - endingGrid.clientWidth);
+    previousButton.disabled = endingGrid.scrollLeft <= 1;
+    nextButton.disabled = endingGrid.scrollLeft >= maxScrollLeft - 1;
 }
 
 function renderHome() {
@@ -67,12 +77,6 @@ function renderHome() {
     renderAuctionList(endingGrid, getEndingSoon(auctions), 'Nenhum leilão próximo do encerramento.');
     renderCategories(auctions);
     updateCarouselControls();
-}
-
-function updateCarouselControls() {
-    const maxScrollLeft = Math.max(0, endingGrid.scrollWidth - endingGrid.clientWidth);
-    previousButton.disabled = endingGrid.scrollLeft <= 1;
-    nextButton.disabled = endingGrid.scrollLeft >= maxScrollLeft - 1;
 }
 
 function scrollCarousel(direction) {
@@ -88,49 +92,38 @@ async function toggleFavorite(button) {
         await setFavorite(auction.id, !auction.isFavorite);
         auction.isFavorite = !auction.isFavorite;
         renderHome();
-        homeStatus.classList.remove('sr-only', 'error-state');
-        homeStatus.classList.add('success-state');
-        homeStatus.textContent = auction.isFavorite ? 'Leilão adicionado aos favoritos.' : 'Leilão removido dos favoritos.';
+        homeStatus.className = 'success-state';
+        homeStatus.textContent = t(auction.isFavorite ? 'Leilão adicionado aos favoritos.' : 'Leilão removido dos favoritos.');
     } catch (error) {
-        homeStatus.classList.remove('sr-only');
-        homeStatus.classList.add('error-state');
-        homeStatus.textContent = error.message;
+        homeStatus.className = 'error-state';
+        homeStatus.textContent = getUserErrorMessage(error, t('Não conseguimos atualizar seus favoritos agora. Tente novamente em instantes.'));
         button.disabled = false;
     }
 }
 
-function addImmediateItem(id) {
-    const auction = auctions.find((item) => String(item.id) === String(id));
-    if (!auction) return;
-    addToCart({ id: auction.id, title: auction.title, price: auction.price, imageUrl: auction.imageUrl, imageAlt: auction.imageAlt, category: auction.category });
-    homeStatus.classList.remove('sr-only', 'error-state');
-    homeStatus.classList.add('success-state');
-    homeStatus.textContent = `${auction.title} foi adicionado ao carrinho.`;
-}
-
-function handleCardAction(event) {
-    const favoriteButton = event.target.closest('[data-action="favorite"]');
-    const buyButton = event.target.closest('[data-action="buy-now"]');
-    if (favoriteButton) toggleFavorite(favoriteButton);
-    if (buyButton) addImmediateItem(buyButton.dataset.auctionId);
-}
-
 async function loadHome() {
-    renderState(featuredGrid, 'loading', 'Carregando leilões em destaque...');
-    renderState(endingGrid, 'loading', 'Carregando leilões próximos do encerramento...');
-    renderState(categoriesGrid, 'loading', 'Carregando categorias...');
+    renderState(featuredGrid, 'loading', t('Carregando leilões em destaque...'));
+    renderState(endingGrid, 'loading', t('Carregando leilões próximos do encerramento...'));
+    renderState(categoriesGrid, 'loading', t('Carregando categorias...'));
     try {
         auctions = normalizeCollection(await getAuctions());
         renderHome();
     } catch (error) {
-        renderState(featuredGrid, 'error', error.message);
-        renderState(endingGrid, 'error', error.message);
-        renderState(categoriesGrid, 'error', error.message);
+        const message = getUserErrorMessage(error, t('Não conseguimos carregar os leilões agora. Tente novamente em instantes.'));
+        renderState(featuredGrid, 'error', message);
+        renderState(endingGrid, 'error', message);
+        renderState(categoriesGrid, 'error', message);
     }
 }
 
-featuredGrid.addEventListener('click', handleCardAction);
-endingGrid.addEventListener('click', handleCardAction);
+featuredGrid.addEventListener('click', (event) => {
+    const button = event.target.closest('[data-action="favorite"]');
+    if (button) toggleFavorite(button);
+});
+endingGrid.addEventListener('click', (event) => {
+    const button = event.target.closest('[data-action="favorite"]');
+    if (button) toggleFavorite(button);
+});
 previousButton.addEventListener('click', () => scrollCarousel(-1));
 nextButton.addEventListener('click', () => scrollCarousel(1));
 endingGrid.addEventListener('scroll', updateCarouselControls);

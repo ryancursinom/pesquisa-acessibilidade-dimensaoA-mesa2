@@ -1,6 +1,8 @@
 import { clearFieldError, focusFirstInvalid, validateEmail, validatePassword, validateRequired } from '../components/formValidation.js';
 import { renderState, setLiveMessage } from '../components/statusMessage.js';
+import { getUserErrorMessage } from '../components/userError.js';
 import { logout } from '../services/authService.js';
+import { t } from '../services/i18n.js';
 import { getProfile, updatePassword, updateProfile } from '../services/userService.js';
 
 const state = document.getElementById('profile-state');
@@ -14,9 +16,10 @@ function getInitials(name) {
     return String(name || 'M').split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join('').toUpperCase();
 }
 
+
 function renderProfile(profile) {
-    document.getElementById('profile-name-heading').textContent = profile.name || 'Usuário Midas';
-    document.getElementById('profile-location').textContent = [profile.city, profile.country].filter(Boolean).join(', ') || 'Localização não informada';
+    document.getElementById('profile-name-heading').textContent = profile.name || t('Usuário Midas');
+    document.getElementById('profile-location').textContent = [profile.city, profile.country].filter(Boolean).join(', ') || t('Localização não informada');
     document.getElementById('profile-avatar').textContent = getInitials(profile.name);
     document.getElementById('profile-name').value = profile.name || '';
     document.getElementById('profile-email').value = profile.email || '';
@@ -29,7 +32,7 @@ function renderProfile(profile) {
 function validateProfileForm() {
     const name = document.getElementById('profile-name');
     const email = document.getElementById('profile-email');
-    const valid = validateRequired(name, 'Nome') && validateRequired(email, 'E-mail') && validateEmail(email);
+    const valid = validateRequired(name, t('Nome')) && validateRequired(email, t('E-mail')) && validateEmail(email);
     if (!valid) focusFirstInvalid(profileForm);
     return valid;
 }
@@ -39,13 +42,12 @@ async function saveProfile(event) {
     if (!validateProfileForm()) return;
     const submitButton = profileForm.querySelector('[type="submit"]');
     submitButton.disabled = true;
-    setLiveMessage(profileStatus, 'Salvando alterações...');
+    setLiveMessage(profileStatus, t('Salvando alterações...'));
     try {
-        const updated = await updateProfile(Object.fromEntries(new FormData(profileForm)));
-        renderProfile(updated);
-        setLiveMessage(profileStatus, 'Perfil atualizado com sucesso.');
+        renderProfile(await updateProfile(Object.fromEntries(new FormData(profileForm))));
+        setLiveMessage(profileStatus, t('Perfil atualizado com sucesso.'));
     } catch (error) {
-        setLiveMessage(profileStatus, error.message, true);
+        setLiveMessage(profileStatus, getUserErrorMessage(error), true);
     } finally {
         submitButton.disabled = false;
     }
@@ -54,7 +56,7 @@ async function saveProfile(event) {
 function validatePasswordForm() {
     const current = document.getElementById('current-password');
     const next = document.getElementById('new-password');
-    const valid = validateRequired(current, 'Senha atual') && validatePassword(next);
+    const valid = validateRequired(current, t('Senha atual')) && validatePassword(next);
     if (!valid) focusFirstInvalid(passwordForm);
     return valid;
 }
@@ -64,24 +66,24 @@ async function savePassword(event) {
     if (!validatePasswordForm()) return;
     const submitButton = passwordForm.querySelector('[type="submit"]');
     submitButton.disabled = true;
-    setLiveMessage(passwordStatus, 'Atualizando senha...');
+    setLiveMessage(passwordStatus, t('Atualizando senha...'));
     try {
         await updatePassword(Object.fromEntries(new FormData(passwordForm)));
         passwordForm.reset();
-        setLiveMessage(passwordStatus, 'Senha atualizada com sucesso.');
+        setLiveMessage(passwordStatus, t('Senha atualizada com sucesso.'));
     } catch (error) {
-        setLiveMessage(passwordStatus, error.message, true);
+        setLiveMessage(passwordStatus, getUserErrorMessage(error), true);
     } finally {
         submitButton.disabled = false;
     }
 }
 
 async function loadProfile() {
-    renderState(state, 'loading', 'Carregando perfil...');
+    renderState(state, 'loading', t('Carregando perfil...'));
     try {
         renderProfile(await getProfile());
     } catch (error) {
-        renderState(state, 'error', `${error.message} Entre novamente para acessar sua conta.`);
+        renderState(state, 'error', `${getUserErrorMessage(error)} ${t('Entre novamente para acessar sua conta.')}`);
     }
 }
 

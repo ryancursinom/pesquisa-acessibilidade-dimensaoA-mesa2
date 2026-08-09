@@ -1,9 +1,25 @@
 import { appendChildren, clearElement, createElement } from '../components/dom.js';
+import { createIcon } from '../components/icons.js';
 import { renderState } from '../components/statusMessage.js';
-import { getFeedbackHighlights } from '../services/feedbackService.js';
+import { getUserErrorMessage } from '../components/userError.js';
 import { normalizeCollection } from '../services/api.js';
+import { getFeedbackHighlights } from '../services/feedbackService.js';
+import { t } from '../services/i18n.js';
 
 const grid = document.getElementById('testimonials-grid');
+
+function createRating(rating) {
+    const ratingElement = createElement('p', {
+        className: 'rating',
+        attrs: { 'aria-label': t('Avaliação: {rating} de 5 estrelas', { rating }) }
+    });
+    const stars = createElement('span', { className: 'rating-stars', attrs: { 'aria-hidden': 'true' } });
+    for (let index = 1; index <= 5; index += 1) {
+        stars.appendChild(createIcon('star', { size: 19, filled: index <= rating }));
+    }
+    ratingElement.appendChild(stars);
+    return ratingElement;
+}
 
 function createTestimonial(feedback) {
     const article = createElement('article', { className: 'testimonial-card' });
@@ -12,30 +28,28 @@ function createTestimonial(feedback) {
     const avatar = createElement('div', { className: 'user-avatar-placeholder', attrs: { 'aria-hidden': 'true' } });
     const userText = createElement('div');
     userText.append(
-        createElement('h3', { className: 'user-name', text: feedback.anonymous ? 'Usuário anônimo' : feedback.userName || 'Usuário Midas' }),
-        createElement('span', { className: 'user-role', text: feedback.role || 'Usuário da plataforma' })
+        createElement('h3', { className: 'user-name', text: feedback.anonymous ? t('Usuário anônimo') : feedback.userName || t('Usuário Midas') }),
+        createElement('span', { className: 'user-role', text: feedback.role || t('Usuário da plataforma') })
     );
     userInfo.append(avatar, userText);
     const rating = Math.max(1, Math.min(5, Number(feedback.rating || 5)));
-    const ratingElement = createElement('p', { className: 'rating', attrs: { 'aria-label': `Avaliação: ${rating} de 5 estrelas` } });
-    ratingElement.appendChild(createElement('span', { text: '★'.repeat(rating) + '☆'.repeat(5 - rating), attrs: { 'aria-hidden': 'true' } }));
-    appendChildren(header, [userInfo, ratingElement]);
-    appendChildren(article, [header, createElement('p', { className: 'testimonial-text', text: feedback.comments || 'Avaliação sem comentário.' })]);
+    appendChildren(header, [userInfo, createRating(rating)]);
+    appendChildren(article, [header, createElement('p', { className: 'testimonial-text', text: feedback.comments || t('Avaliação sem comentário.') })]);
     return article;
 }
 
 async function loadTestimonials() {
-    renderState(grid, 'loading', 'Carregando avaliações...');
+    renderState(grid, 'loading', t('Carregando avaliações...'));
     try {
         const feedbacks = normalizeCollection(await getFeedbackHighlights()).slice(0, 4);
         clearElement(grid);
         if (!feedbacks.length) {
-            renderState(grid, 'empty', 'Ainda não há avaliações publicadas. Você pode enviar a primeira pelo botão “Avaliar plataforma”.');
+            renderState(grid, 'empty', t('Ainda não há avaliações publicadas. Você pode enviar a primeira pelo botão “Avaliar plataforma”.'));
             return;
         }
         feedbacks.forEach((feedback) => grid.appendChild(createTestimonial(feedback)));
     } catch (error) {
-        renderState(grid, 'error', error.message);
+        renderState(grid, 'error', getUserErrorMessage(error, t('Não conseguimos carregar as avaliações agora. Tente novamente em instantes.')));
     }
 }
 

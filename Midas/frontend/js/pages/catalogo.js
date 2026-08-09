@@ -1,14 +1,19 @@
 import { createAuctionCard } from '../components/auctionCard.js';
 import { debounce, filterAuctions, sortAuctions } from '../components/auctionFilters.js';
+import { categorySupportsBrand } from '../components/catalogConfig.js';
 import { appendChildren, clearElement, createElement } from '../components/dom.js';
+import { getUserErrorMessage } from '../components/userError.js';
 import { renderState } from '../components/statusMessage.js';
 import { getAuctions, setFavorite } from '../services/auctionService.js';
 import { normalizeCollection } from '../services/api.js';
-import { addToCart } from '../services/cartService.js';
+import { t } from '../services/i18n.js';
 
 const form = document.getElementById('catalog-search-form');
 const content = document.getElementById('catalog-content');
 const summary = document.getElementById('catalog-result-summary');
+const categorySelect = document.getElementById('catalog-category');
+const brandField = document.getElementById('catalog-brand-field');
+const brandInput = document.getElementById('catalog-brand');
 let auctions = [];
 
 function getFilters() {
@@ -16,8 +21,11 @@ function getFilters() {
     return {
         search: data.get('search'),
         sort: data.get('sort'),
-        saleType: data.get('saleType'),
-        status: data.get('status')
+        category: data.get('category'),
+        minPrice: data.get('minPrice'),
+        maxPrice: data.get('maxPrice'),
+        ending: data.get('ending'),
+        brand: data.get('brand')
     };
 }
 
@@ -33,10 +41,10 @@ function groupByCategory(items) {
 function createCategoryBlock(category, items) {
     const section = createElement('section', { className: 'catalog-category-block' });
     const header = createElement('header', { className: 'catalog-category-header' });
-    const title = createElement('h2', { text: category });
+    const title = createElement('h2', { text: t(category) });
     const link = createElement('a', {
         className: 'catalog-category-link',
-        text: `Acessar categoria de ${category}`,
+        text: t('Acessar categoria de {category}', { category: t(category) }),
         attrs: { href: `categoria.html?categoria=${encodeURIComponent(category)}` }
     });
     const grid = createElement('div', { className: 'auctions-grid' });
@@ -46,71 +54,63 @@ function createCategoryBlock(category, items) {
     return section;
 }
 
+function updateBrandVisibility() {
+    const visible = categorySupportsBrand(categorySelect.value);
+    brandField.hidden = !visible;
+    if (!visible) brandInput.value = '';
+}
+
 function renderCatalog() {
     const filters = getFilters();
     const filtered = sortAuctions(filterAuctions(auctions, filters), filters.sort);
     clearElement(content);
-    summary.textContent = `${filtered.length} item(ns) encontrado(s).`;
-
+    summary.textContent = t('Itens encontrados: {count}', { count: filtered.length });
     if (!filtered.length) {
-        renderState(content, 'empty', 'Nenhum item corresponde aos filtros selecionados.');
+        renderState(content, 'empty', t('Nenhum item corresponde aos filtros selecionados. Tente limpar alguns filtros.'));
         return;
     }
-
-    groupByCategory(filtered).forEach((items, category) => {
-        content.appendChild(createCategoryBlock(category, items));
-    });
+    groupByCategory(filtered).forEach((items, category) => content.appendChild(createCategoryBlock(category, items)));
 }
 
 async function toggleFavorite(button) {
-    const id = button.dataset.auctionId;
-    const auction = auctions.find((item) => String(item.id) === String(id));
+    const auction = auctions.find((item) => String(item.id) === String(button.dataset.auctionId));
     if (!auction) return;
-    const nextFavorite = !auction.isFavorite;
     button.disabled = true;
     try {
-        await setFavorite(id, nextFavorite);
-        auction.isFavorite = nextFavorite;
+        await setFavorite(auction.id, !auction.isFavorite);
+        auction.isFavorite = !auction.isFavorite;
         renderCatalog();
+        summary.textContent = t(auction.isFavorite ? 'Leilão adicionado aos favoritos.' : 'Leilão removido dos favoritos.');
     } catch (error) {
-        summary.textContent = error.message;
+        summary.textContent = getUserErrorMessage(error, t('Não conseguimos atualizar seus favoritos agora. Tente novamente em instantes.'));
     } finally {
         button.disabled = false;
     }
 }
 
-function addImmediateItem(id) {
-    const auction = auctions.find((item) => String(item.id) === String(id));
-    if (!auction) return;
-    addToCart({
-        id: auction.id,
-        title: auction.title,
-        price: auction.price,
-        imageUrl: auction.imageUrl,
-        imageAlt: auction.imageAlt,
-        category: auction.category
-    });
-    summary.textContent = `${auction.title} foi adicionado ao carrinho.`;
-}
-
 async function loadCatalog() {
-    renderState(content, 'loading', 'Carregando catálogo...');
+    renderState(content, 'loading', t('Carregando catálogo...'));
     try {
         auctions = normalizeCollection(await getAuctions());
         renderCatalog();
     } catch (error) {
-        renderState(content, 'error', error.message);
+        renderState(content, 'error', getUserErrorMessage(error, t('Não conseguimos carregar o catálogo agora. Tente novamente em instantes.')));
         summary.textContent = '';
     }
 }
 
 form.addEventListener('input', debounce(renderCatalog));
-form.addEventListener('change', renderCatalog);
+form.addEventListener('change', (event) => {
+    if (event.target === categorySelect) updateBrandVisibility();
+    renderCatalog();
+});
+form.addEventListener('reset', () => window.setTimeout(() => {
+    updateBrandVisibility();
+    renderCatalog();
+}));
 content.addEventListener('click', (event) => {
     const favoriteButton = event.target.closest('[data-action="favorite"]');
-    const buyButton = event.target.closest('[data-action="buy-now"]');
     if (favoriteButton) toggleFavorite(favoriteButton);
-    if (buyButton) addImmediateItem(buyButton.dataset.auctionId);
 });
-
+updateBrandVisibility();
 loadCatalog();

@@ -1,6 +1,8 @@
 import { initAccessibilityPanel } from './components/accessibilityPanel.js';
 import { initFeedbackModal } from './components/feedbackModal.js';
+import { renderStaticIcons } from './components/icons.js';
 import { initSiteChrome } from './components/siteChrome.js';
+import { initI18n } from './services/i18n.js';
 import { applySettings } from './services/settingsService.js';
 
 const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -33,9 +35,11 @@ function initGlobalNavigation() {
 
 function initGlobalFeatures() {
     applySettings();
+    initI18n();
     initSiteChrome();
     initAccessibilityPanel();
     initFeedbackModal();
+    renderStaticIcons();
     initGlobalNavigation();
 }
 
