@@ -22,16 +22,16 @@
 .advantage-icon-v2 svg { width: 100%; height: 100%; }
 .advantage-card-v2 h3 { margin-bottom: 16px; color: #FFFFFF; font-size: 20px; }
 .advantage-card-v2 p { color: #BDB6A9; font-size: 15px; }
-.testimonials-section { padding: 100px 0; background: #EAE1C9; color: #211B10; }
+.testimonials-section { padding: 100px 0; border-top: 1px solid var(--border-dark); background: #15161A; color: #F4F3F0; }
 .testimonials-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 30px; }
-.testimonial-card { padding: 40px; border: 1px solid #C9B98F; border-radius: 16px; background: #FFFDF8; color: #211B10; transition: transform 160ms ease, box-shadow 160ms ease; }
+.testimonial-card { padding: 40px; border: 1px solid var(--border-dark); border-radius: 16px; background: var(--bg-dark-elevated); color: var(--text-white); transition: transform 160ms ease, box-shadow 160ms ease; }
 .testimonial-card:hover { transform: translateY(-3px); box-shadow: 0 14px 32px rgba(64,47,5,.12); }
 .testimonial-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; margin-bottom: 20px; }
 .user-info { display: flex; align-items: center; gap: 12px; }
-.user-avatar-placeholder { width: 44px; height: 44px; flex-shrink: 0; border-radius: 50%; background: #D7CBAA; }
-.user-name { color: #211B10; font-size: 1rem; }
-.user-role, .testimonial-text { color: #5C5446; }
-.rating { white-space: nowrap; }
+.user-avatar-placeholder { width: 44px; height: 44px; flex-shrink: 0; border-radius: 50%; background: var(--bg-dark-soft); }
+.user-name { color: var(--text-white); font-size: 1rem; }
+.user-role, .testimonial-text { color: var(--text-muted-dark); }
+.rating { color: var(--primary-gold-hover); white-space: nowrap; }
 
 html[data-theme='light'] .about-page { background: #FFFDF8; }
 html[data-theme='light'] .about-hero-v3 { background: linear-gradient(135deg,#FFFDF8 0%,#F5E7BA 100%); color: #211B10; }
@@ -45,12 +45,49 @@ html[data-theme='light'] .advantage-card-v2:hover { border-color: #7A5D00; backg
 html[data-theme='light'] .advantage-card-v2 h3, html[data-theme='light'] .advantage-icon-v2 { color: #211B10; }
 html[data-theme='light'] .advantage-icon-v2 { color: #745C00; }
 html[data-theme='light'] .advantage-card-v2 p { color: #5A5140; }
-html[data-theme='light'] .testimonials-section { background: #F7F2E8; }
+html[data-theme='light'] .testimonials-section { border-top-color: #D8D4CA; background: #F5F5F2; color: #211B10; }
+
+html[data-theme='light'] .testimonial-card {
+    border-color: #D8D4CA;
+    background: #FFFFFF;
+    color: #211B10;
+}
+html[data-theme='light'] .user-avatar-placeholder { background: #E8E4DA; }
+html[data-theme='light'] .user-name { color: #211B10; }
+html[data-theme='light'] .user-role,
+html[data-theme='light'] .testimonial-text { color: #5C5446; }
 
 html[data-contrast='high'] .about-page,
 html[data-contrast='high'] .about-hero-v3,
 html[data-contrast='high'] .about-section.dark-bg,
-html[data-contrast='high'] .advantages-section-v2 { background: #000000; color: #FFFFFF; }
+html[data-contrast='high'] .advantages-section-v2,
+html[data-contrast='high'] .testimonials-section,
+html[data-contrast='high'] .advantage-card-v2,
+html[data-contrast='high'] .testimonial-card {
+    border-color: #FFFFFF;
+    background: #000000;
+    color: #FFFFFF;
+}
+
+html[data-contrast='high'] .about-hero-v3 p,
+html[data-contrast='high'] .about-text p,
+html[data-contrast='high'] .advantage-card-v2 p,
+html[data-contrast='high'] .user-role,
+html[data-contrast='high'] .testimonial-text {
+    color: #FFFFFF;
+}
+
+html[data-contrast='high'] .hero-v3__subtitle,
+html[data-contrast='high'] .about-hero-v3 .highlight,
+html[data-contrast='high'] .advantage-icon-v2,
+html[data-contrast='high'] .rating {
+    color: #FFD84D;
+}
+
+html[data-contrast='high'] .advantage-card-v2 h3,
+html[data-contrast='high'] .user-name {
+    color: #FFFFFF;
+}
 
 @media (max-width: 900px) {
     .about-grid, .testimonials-grid { grid-template-columns: 1fr; }
@@ -63,4 +100,10 @@ html[data-contrast='high'] .advantages-section-v2 { background: #000000; color: 
     .about-hero-v3, .about-section.dark-bg, .advantages-section-v2, .testimonials-section { padding: 64px 0; }
     .testimonial-card, .advantage-card-v2 { padding: 28px; }
     .testimonial-header { flex-direction: column; }
+}
+
+html[data-contrast='high'] .about-section.dark-bg:nth-of-type(even) {
+    border-color: #FFFFFF;
+    background: #000000;
+    color: #FFFFFF;
 }

@@ -7,6 +7,7 @@ const list = document.getElementById('cart-list');
 const count = document.getElementById('cart-item-count');
 const total = document.getElementById('cart-total');
 const checkoutLink = document.getElementById('cart-checkout-link');
+const cartStatus = document.getElementById('cart-status');
 
 function createQuantityField(item) {
     const wrapper = createElement('div', { className: 'cart-quantity' });
@@ -31,7 +32,7 @@ function createProductMedia(item) {
 }
 
 function createCartItem(item) {
-    const article = createElement('article', { className: 'cart-item' });
+    const article = createElement('article', { className: 'cart-item', dataset: { itemId: item.id } });
     const info = createElement('div', { className: 'cart-item-info' });
     info.append(
         createElement('h2', { text: t(item.title) }),
@@ -49,41 +50,70 @@ function createCartItem(item) {
     return article;
 }
 
-function renderCart() {
-    const items = getCart();
-    clearElement(list);
+function updateSummary(items = getCart()) {
     count.textContent = String(getCartItemCount(items));
     total.textContent = formatCurrency(getCartTotal(items));
     checkoutLink.setAttribute('aria-disabled', String(items.length === 0));
     checkoutLink.tabIndex = items.length ? 0 : -1;
+}
 
+function renderEmptyCart() {
+    const message = createElement('div', { className: 'empty-state cart-empty-state' });
+    message.append(
+        createElement('p', { text: t('Seu carrinho está vazio.') }),
+        createElement('a', { className: 'btn-primary', text: t('Ir à Loja Oficial Midas'), attrs: { href: 'loja-oficial.html' } })
+    );
+    list.appendChild(message);
+}
+
+function renderCart() {
+    const items = getCart();
+    clearElement(list);
+    updateSummary(items);
     if (!items.length) {
-        const message = createElement('div', { className: 'empty-state cart-empty-state' });
-        message.append(
-            createElement('p', { text: t('Seu carrinho está vazio.') }),
-            createElement('a', { className: 'btn-primary', text: t('Ir à Loja Oficial Midas'), attrs: { href: 'loja-oficial.html' } })
-        );
-        list.appendChild(message);
+        renderEmptyCart();
         return;
     }
     items.forEach((item) => list.appendChild(createCartItem(item)));
 }
 
+function announceCartUpdate(message) {
+    cartStatus.textContent = '';
+    window.requestAnimationFrame(() => {
+        cartStatus.textContent = message;
+    });
+}
+
 list.addEventListener('click', (event) => {
     const removeButton = event.target.closest('[data-action="remove"]');
     if (!removeButton) return;
-    removeFromCart(removeButton.dataset.itemId);
-    renderCart();
+    const article = removeButton.closest('.cart-item');
+    const nextArticle = article.nextElementSibling || article.previousElementSibling;
+    const items = removeFromCart(removeButton.dataset.itemId);
+    article.remove();
+    updateSummary(items);
+
+    if (!items.length) {
+        renderEmptyCart();
+        list.querySelector('a')?.focus();
+    } else {
+        nextArticle?.querySelector('[data-action="remove"]')?.focus();
+    }
+    announceCartUpdate(t('Produto removido. Total do carrinho: {total}.', { total: formatCurrency(getCartTotal(items)) }));
 });
 
 list.addEventListener('change', (event) => {
     const quantityInput = event.target.closest('[data-action="quantity"]');
     if (!quantityInput) return;
-    updateCartQuantity(quantityInput.dataset.itemId, quantityInput.value);
-    renderCart();
+    const items = updateCartQuantity(quantityInput.dataset.itemId, quantityInput.value);
+    const updatedItem = items.find((item) => String(item.id) === String(quantityInput.dataset.itemId));
+    quantityInput.value = String(updatedItem?.quantity || 1);
+    updateSummary(items);
+    announceCartUpdate(t('Quantidade atualizada. Total do carrinho: {total}.', { total: formatCurrency(getCartTotal(items)) }));
 });
 
 checkoutLink.addEventListener('click', (event) => {
     if (!getCart().length) event.preventDefault();
 });
+
 renderCart();

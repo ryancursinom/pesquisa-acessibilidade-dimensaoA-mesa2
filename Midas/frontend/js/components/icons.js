@@ -53,6 +53,12 @@ const ICONS = {
         ['path', { d: 'M12 3v18' }],
         ['path', { d: 'M3 7h18' }]
     ],
+    banknote: [
+        ['rect', { x: 2.5, y: 6, width: 19, height: 12, rx: 1.5 }],
+        ['circle', { cx: 12, cy: 12, r: 2.5 }],
+        ['path', { d: 'M6 9.5a2 2 0 0 1-2 2' }],
+        ['path', { d: 'M18 14.5a2 2 0 0 1 2-2' }]
+    ],
     home: [
         ['path', { d: 'm3 11 9-8 9 8' }],
         ['path', { d: 'M5 10v10h14V10' }],

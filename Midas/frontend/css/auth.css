@@ -40,7 +40,18 @@
 }
 
 .auth-switch a {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
     color: var(--primary-gold);
     text-decoration: underline;
     text-underline-offset: 3px;
+}
+
+html[data-theme='light'] .auth-switch a {
+    color: var(--gold-ink);
+}
+
+html[data-contrast='high'] .auth-switch a {
+    color: #FFD84D;
 }

@@ -37,16 +37,17 @@
 }
 
 .badge-live-label .dot { width: 8px; height: 8px; border-radius: 50%; background: #FFFFFF; }
-.hero h1 { max-width: 680px; margin-bottom: 22px; font-size: clamp(2.35rem, 5.8vw, 4.6rem); line-height: 1.03; }
+.hero h1 { max-width: 640px; margin-bottom: 22px; font-size: clamp(2.1rem, 4.4vw, 3.55rem); line-height: 1.08; }
 .hero .highlight { color: #E6CA66; }
 .hero__text-side > p { max-width: 510px; margin-bottom: 28px; color: #C9C5BC; font-size: 1.08rem; }
 .hero__image-side { display: grid; place-items: center; }
 .hero__image-side img { width: 100%; max-height: 470px; border-radius: var(--radius-lg); object-fit: cover; box-shadow: 0 25px 70px rgba(212, 175, 55, 0.16); }
 
 .kpis { padding: 34px 0; border-bottom: 1px solid var(--border-dark); background: #15161A; }
-.kpis__grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 26px; }
+.kpis__grid { display: grid; list-style: none; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 26px; }
 .kpi-item { display: flex; align-items: center; gap: 14px; }
-.kpi-icon { display: grid; width: 44px; height: 44px; flex: 0 0 auto; place-items: center; border-radius: 10px; background: #24231E; color: #E6CA66; }
+.kpi-icon { display: grid; width: 44px; height: 44px; flex: 0 0 auto; place-items: center; color: #F4F3F0; }
+.kpi-icon svg { width: 32px; height: 32px; stroke-width: 2.2; }
 .kpi-info strong, .kpi-info span { display: block; }
 .kpi-info strong { font-size: 0.95rem; }
 .kpi-info span { color: #BDB9B0; font-size: 0.78rem; }
@@ -78,7 +79,7 @@
 .category-card:hover { border-color: #D4AF37; transform: translateY(-3px); }
 .category-card h3 { font-size: 1.15rem; }
 .category-card p { color: #C3C0B8; font-size: 0.86rem; }
-.category-card a { width: fit-content; margin-top: 6px; color: #E6CA66; font-weight: 800; text-decoration: underline; text-underline-offset: 3px; }
+.category-card a { display: inline-flex; width: fit-content; min-height: 44px; align-items: center; margin-top: 6px; color: #E6CA66; font-weight: 800; text-decoration: underline; text-underline-offset: 3px; }
 .section-footer { display: flex; justify-content: center; margin-top: 34px; }
 .carousel-wrapper { position: relative; }
 .auctions-grid--carousel { display: grid; grid-auto-columns: minmax(280px, 1fr); grid-auto-flow: column; grid-template-columns: none; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: thin; }
@@ -88,7 +89,7 @@
 
 html[data-theme='light'] .home-page { background: #FFFDF8; color: #211B10; }
 html[data-theme='light'] .kpis { border-bottom-color: #DED3B7; background: #FFFDF8; }
-html[data-theme='light'] .kpi-icon { background: #F3E8C8; color: #5A4500; }
+html[data-theme='light'] .kpi-icon { color: #111111; }
 html[data-theme='light'] .kpi-info span { color: #5B5140; }
 html[data-theme='light'] .auctions-section--ending { background: #F4EFE3; color: #211B10; }
 html[data-theme='light'] .auctions-section--ending .section-header p { color: #5C5446; }
@@ -107,6 +108,52 @@ html[data-theme='light'] .category-card { border-color: #C6B172; background: lin
 html[data-theme='light'] .category-card p { color: #5A5140; }
 html[data-theme='light'] .category-card a { color: #624B00; }
 html[data-theme='light'] .category-card:hover { border-color: #7A5D00; box-shadow: 0 12px 28px rgba(89, 66, 4, 0.14); }
+
+
+html[data-contrast='high'] .home-page,
+html[data-contrast='high'] .hero,
+html[data-contrast='high'] .kpis,
+html[data-contrast='high'] .auctions-section--featured,
+html[data-contrast='high'] .auctions-section--ending,
+html[data-contrast='high'] .categories-section,
+html[data-contrast='high'] .category-card {
+    border-color: #FFFFFF;
+    background: #000000;
+    color: #FFFFFF;
+}
+
+html[data-contrast='high'] .hero .highlight,
+html[data-contrast='high'] .category-card a,
+html[data-contrast='high'] .carousel-control,
+html[data-contrast='high'] .auctions-section--featured .carousel-control {
+    color: #FFD84D;
+}
+
+html[data-contrast='high'] .hero__text-side > p,
+html[data-contrast='high'] .kpi-info span,
+html[data-contrast='high'] .section-header p,
+html[data-contrast='high'] .section-header--dark p,
+html[data-contrast='high'] .category-card p,
+html[data-contrast='high'] .auctions-section--featured .section-header p,
+html[data-contrast='high'] .auctions-section--ending .section-header p {
+    color: #FFFFFF;
+}
+
+html[data-contrast='high'] .kpi-icon {
+    color: #FFFFFF;
+}
+
+html[data-contrast='high'] .carousel-control,
+html[data-contrast='high'] .auctions-section--featured .carousel-control {
+    border-color: #FFFFFF;
+    background: #000000;
+}
+
+html[data-contrast='high'] .carousel-control:hover,
+html[data-contrast='high'] .auctions-section--featured .carousel-control:hover {
+    background: #FFD84D;
+    color: #000000;
+}
 
 @media (max-width: 900px) {
     .hero__content { grid-template-columns: 1fr; }

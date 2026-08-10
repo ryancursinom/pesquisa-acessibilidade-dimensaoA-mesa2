@@ -1,7 +1,7 @@
 import { UserFacingError } from '../components/userError.js';
 import { t } from './i18n.js';
 
-const DEFAULT_API_BASE_URL = 'http://localhost:8080/api';
+const API_BASE_URL = 'http://localhost:8080/api';
 const REQUEST_TIMEOUT_MS = 10000;
 
 export class ApiError extends UserFacingError {
@@ -11,9 +11,6 @@ export class ApiError extends UserFacingError {
     }
 }
 
-function getApiBaseUrl() {
-    return localStorage.getItem('midas-api-base-url') || DEFAULT_API_BASE_URL;
-}
 
 function getAuthToken() {
     return localStorage.getItem('midas-auth-token');
@@ -55,7 +52,7 @@ function getStatusMessage(status) {
 export async function apiRequest(path, options = {}) {
     const controller = new AbortController();
     const timeoutId = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-    const url = `${getApiBaseUrl()}${path}`;
+    const url = `${API_BASE_URL}${path}`;
 
     try {
         const response = await fetch(url, {

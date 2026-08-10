@@ -26,7 +26,18 @@
 }
 
 .catalog-category-link {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
     color: var(--primary-gold);
     text-decoration: underline;
     text-underline-offset: 4px;
+}
+
+html[data-theme='light'] .catalog-category-link {
+    color: var(--gold-ink);
+}
+
+html[data-contrast='high'] .catalog-category-link {
+    color: #FFD84D;
 }

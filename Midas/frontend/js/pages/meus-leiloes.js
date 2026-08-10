@@ -17,7 +17,7 @@ const createButton = document.getElementById('my-create-auction');
 const categorySelect = document.getElementById('my-category');
 const brandField = document.getElementById('my-brand-field');
 const brandInput = document.getElementById('my-brand');
-const currentTab = new URLSearchParams(window.location.search).get('aba') || 'favoritos';
+const requestedTab = new URLSearchParams(window.location.search).get('aba') || 'favoritos';
 let auctions = [];
 
 const tabConfig = {
@@ -34,6 +34,8 @@ const tabConfig = {
         description: 'Aqui você acompanha os leilões em que já participou com algum lance.', loader: getMyBidAuctions
     }
 };
+
+const currentTab = tabConfig[requestedTab] ? requestedTab : 'favoritos';
 
 function getActiveConfig() {
     return tabConfig[currentTab] || tabConfig.favoritos;

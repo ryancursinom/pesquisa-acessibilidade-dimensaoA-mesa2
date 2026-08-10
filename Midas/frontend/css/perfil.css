@@ -107,3 +107,22 @@
         flex-direction: column;
     }
 }
+
+html[data-theme='light'] .profile-sidebar .logout-button {
+    color: #A11212;
+}
+
+html[data-theme='light'] .profile-avatar {
+    border-color: var(--gold-ink);
+    color: var(--gold-ink);
+}
+
+html[data-contrast='high'] .profile-sidebar .logout-button {
+    color: #FFB4B4;
+}
+
+html[data-contrast='high'] .profile-avatar {
+    border-color: #FFD84D;
+    background: #000000;
+    color: #FFD84D;
+}

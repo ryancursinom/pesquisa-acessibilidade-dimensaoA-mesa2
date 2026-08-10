@@ -1,10 +1,30 @@
 import { getSettings } from './settingsService.js';
 
 const SUPPORTED_LANGUAGES = new Set(['pt-BR', 'en-US', 'es-ES', 'zh-CN']);
-const LOCALES = { 'pt-BR': 'pt-BR', 'en-US': 'en-US', 'es-ES': 'es-ES', 'zh-CN': 'zh-CN' };
-
 const TRANSLATIONS = {
     'en-US': {
+    'Nos preocupamos com a sua facilidade de encontrar o leilão ideal para você, sem que sejam necessárias horas de busca.': 'We care about making it easy for you to find the ideal auction without spending hours searching.',
+    'Relação Cliente e Leiloeiro': 'Client and Auctioneer Relationship',
+    'A conexão entre o cliente e o leiloeiro é direta, sem a necessidade de passar pelo nosso sistema como um intermediário.': 'The connection between the client and the auctioneer is direct, without requiring our system to act as an intermediary.',
+    'Fornecemos um sistema acessível para todas as pessoas, com suporte para leitores de tela e navegação por teclado.': 'We provide an accessible system for everyone, with screen reader support and keyboard navigation.',
+    'Suporte Instantâneo': 'Instant Support',
+    'Fornecemos um suporte instantâneo através de um agente de IA (Inteligência Artificial) que responde todas as suas dúvidas 24/7.': 'We provide instant support through an AI (Artificial Intelligence) agent that answers all your questions 24/7.',
+    'Sistema Nacional': 'National Platform',
+    'Ao acessar nossa plataforma, você fortalece um projeto nacional e impulsiona a modernização dos leilões no Brasil.': 'By using our platform, you strengthen a national project and help modernize auctions in Brazil.',
+    'Consulte imagens, informações, lances e opções de compra de um leilão do Midas.': 'View images, information, bids, and purchase options for a Midas auction.',
+    'Caminho de navegação': 'Breadcrumb',
+    'Detalhes do leilão': 'Auction details',
+    'Galeria de imagens do item': 'Item image gallery',
+    'Miniaturas da galeria. Use as setas esquerda e direita para navegar.': 'Gallery thumbnails. Use the left and right arrow keys to navigate.',
+    'Tempo restante': 'Time remaining',
+    'Valor do novo lance': 'New bid amount',
+    'Os valores e horários são exibidos sem identificar quem realizou cada lance.': 'Bid amounts and times are shown without identifying who placed each bid.',
+    'Imagem {current} de {title}': 'Image {current} of {title}',
+    'Encerra em {days}d {hours}h {minutes}min {seconds}s': 'Ends in {days}d {hours}h {minutes}m {seconds}s',
+    'Leilão encerrado': 'Auction ended',
+    'O novo lance deve ser maior que {price}.': 'The new bid must be greater than {price}.',
+    'Lance #{number}': 'Bid #{number}',
+    'O Que Nossos Clientes Falam': 'What Our Customers Say',
     "24 horas": "24 hours",
     "3 dias": "3 days",
     "7 dias": "7 days",
@@ -345,6 +365,8 @@ const TRANSLATIONS = {
     "Pôster decorativo com a identidade visual do Midas.": "Decorative poster featuring Midas visual identity.",
     "Qualquer tempo": "Any time",
     "Quantidade": "Quantity",
+    'Produto removido. Total do carrinho: {total}.': 'Product removed. Cart total: {total}.',
+    'Quantidade atualizada. Total do carrinho: {total}.': 'Quantity updated. Cart total: {total}.',
     "Quantidade de {title}": "Quantity of {title}",
     "R$": "R$",
     "R$ 0,00": "R$ 0,00",
@@ -439,6 +461,28 @@ const TRANSLATIONS = {
     "中文（简体）": "中文（简体）"
 },
     'es-ES': {
+    'Nos preocupamos com a sua facilidade de encontrar o leilão ideal para você, sem que sejam necessárias horas de busca.': 'Nos importa que puedas encontrar la subasta ideal con facilidad, sin tener que pasar horas buscando.',
+    'Relação Cliente e Leiloeiro': 'Relación entre Cliente y Subastador',
+    'A conexão entre o cliente e o leiloeiro é direta, sem a necessidade de passar pelo nosso sistema como um intermediário.': 'La conexión entre el cliente y el subastador es directa, sin necesidad de que nuestro sistema actúe como intermediario.',
+    'Fornecemos um sistema acessível para todas as pessoas, com suporte para leitores de tela e navegação por teclado.': 'Ofrecemos un sistema accesible para todas las personas, compatible con lectores de pantalla y navegación por teclado.',
+    'Suporte Instantâneo': 'Soporte Instantáneo',
+    'Fornecemos um suporte instantâneo através de um agente de IA (Inteligência Artificial) que responde todas as suas dúvidas 24/7.': 'Ofrecemos soporte instantáneo mediante un agente de IA (Inteligencia Artificial) que responde tus dudas las 24 horas, todos los días.',
+    'Sistema Nacional': 'Sistema Nacional',
+    'Ao acessar nossa plataforma, você fortalece um projeto nacional e impulsiona a modernização dos leilões no Brasil.': 'Al acceder a nuestra plataforma, fortaleces un proyecto nacional e impulsas la modernización de las subastas en Brasil.',
+    'Consulte imagens, informações, lances e opções de compra de um leilão do Midas.': 'Consulta imágenes, información, pujas y opciones de compra de una subasta de Midas.',
+    'Caminho de navegação': 'Ruta de navegación',
+    'Detalhes do leilão': 'Detalles de la subasta',
+    'Galeria de imagens do item': 'Galería de imágenes del artículo',
+    'Miniaturas da galeria. Use as setas esquerda e direita para navegar.': 'Miniaturas de la galería. Usa las flechas izquierda y derecha para navegar.',
+    'Tempo restante': 'Tiempo restante',
+    'Valor do novo lance': 'Importe de la nueva puja',
+    'Os valores e horários são exibidos sem identificar quem realizou cada lance.': 'Los importes y horarios se muestran sin identificar a quien realizó cada puja.',
+    'Imagem {current} de {title}': 'Imagen {current} de {title}',
+    'Encerra em {days}d {hours}h {minutes}min {seconds}s': 'Finaliza en {days}d {hours}h {minutes}min {seconds}s',
+    'Leilão encerrado': 'Subasta finalizada',
+    'O novo lance deve ser maior que {price}.': 'La nueva puja debe ser mayor que {price}.',
+    'Lance #{number}': 'Puja #{number}',
+    'O Que Nossos Clientes Falam': 'Lo Que Dicen Nuestros Clientes',
     "24 horas": "24 horas",
     "3 dias": "3 días",
     "7 dias": "7 días",
@@ -779,6 +823,8 @@ const TRANSLATIONS = {
     "Pôster decorativo com a identidade visual do Midas.": "Póster decorativo con la identidad visual de Midas.",
     "Qualquer tempo": "Cualquier tiempo",
     "Quantidade": "Cantidad",
+    'Produto removido. Total do carrinho: {total}.': 'Producto eliminado. Total del carrito: {total}.',
+    'Quantidade atualizada. Total do carrinho: {total}.': 'Cantidad actualizada. Total del carrito: {total}.',
     "Quantidade de {title}": "Cantidad de {title}",
     "R$": "R$",
     "R$ 0,00": "R$ 0,00",
@@ -873,6 +919,28 @@ const TRANSLATIONS = {
     "中文（简体）": "中文（简体）"
 },
     'zh-CN': {
+    'Nos preocupamos com a sua facilidade de encontrar o leilão ideal para você, sem que sejam necessárias horas de busca.': '我们重视让您轻松找到理想的拍卖品，无需花费数小时搜索。',
+    'Relação Cliente e Leiloeiro': '客户与拍卖方的联系',
+    'A conexão entre o cliente e o leiloeiro é direta, sem a necessidade de passar pelo nosso sistema como um intermediário.': '客户与拍卖方可以直接联系，无需让我们的系统充当中间方。',
+    'Fornecemos um sistema acessível para todas as pessoas, com suporte para leitores de tela e navegação por teclado.': '我们为所有人提供无障碍系统，支持屏幕阅读器和键盘导航。',
+    'Suporte Instantâneo': '即时支持',
+    'Fornecemos um suporte instantâneo através de um agente de IA (Inteligência Artificial) que responde todas as suas dúvidas 24/7.': '我们通过人工智能客服提供全天候即时支持，随时解答您的问题。',
+    'Sistema Nacional': '巴西本土平台',
+    'Ao acessar nossa plataforma, você fortalece um projeto nacional e impulsiona a modernização dos leilões no Brasil.': '使用我们的平台，就是支持巴西本土项目并推动巴西拍卖行业现代化。',
+    'Consulte imagens, informações, lances e opções de compra de um leilão do Midas.': '查看 Midas 拍卖的图片、信息、出价记录和购买选项。',
+    'Caminho de navegação': '面包屑导航',
+    'Detalhes do leilão': '拍卖详情',
+    'Galeria de imagens do item': '商品图片库',
+    'Miniaturas da galeria. Use as setas esquerda e direita para navegar.': '图片缩略图。可使用键盘左右方向键浏览。',
+    'Tempo restante': '剩余时间',
+    'Valor do novo lance': '新出价金额',
+    'Os valores e horários são exibidos sem identificar quem realizou cada lance.': '仅显示出价金额和时间，不公开出价者身份。',
+    'Imagem {current} de {title}': '{title} 的第 {current} 张图片',
+    'Encerra em {days}d {hours}h {minutes}min {seconds}s': '剩余 {days}天 {hours}小时 {minutes}分 {seconds}秒',
+    'Leilão encerrado': '拍卖已结束',
+    'O novo lance deve ser maior que {price}.': '新出价必须高于 {price}。',
+    'Lance #{number}': '出价 #{number}',
+    'O Que Nossos Clientes Falam': '客户评价',
     "24 horas": "24 小时",
     "3 dias": "3 天",
     "7 dias": "7 天",
@@ -1213,6 +1281,8 @@ const TRANSLATIONS = {
     "Pôster decorativo com a identidade visual do Midas.": "采用 Midas 品牌视觉设计的装饰海报。",
     "Qualquer tempo": "不限剩余时间",
     "Quantidade": "数量",
+    'Produto removido. Total do carrinho: {total}.': '商品已移除。购物车总计：{total}。',
+    'Quantidade atualizada. Total do carrinho: {total}.': '数量已更新。购物车总计：{total}。',
     "Quantidade de {title}": "{title} 的数量",
     "R$": "R$",
     "R$ 0,00": "R$ 0,00",
@@ -1309,7 +1379,6 @@ const TRANSLATIONS = {
 };
 
 const TRANSLATABLE_ATTRIBUTES = ['placeholder', 'aria-label', 'title', 'alt'];
-let observer;
 
 export function getCurrentLanguage() {
     const language = getSettings().language;
@@ -1317,7 +1386,7 @@ export function getCurrentLanguage() {
 }
 
 export function getCurrentLocale() {
-    return LOCALES[getCurrentLanguage()] || 'pt-BR';
+    return getCurrentLanguage();
 }
 
 function interpolate(value, params) {
@@ -1374,24 +1443,7 @@ export function translatePage(root = document) {
     nodes.forEach(translateTextNode);
 }
 
-function observeTranslations() {
-    observer?.disconnect();
-    if (getCurrentLanguage() === 'pt-BR') return;
-    observer = new MutationObserver((mutations) => {
-        observer.disconnect();
-        mutations.forEach((mutation) => {
-            mutation.addedNodes.forEach((node) => {
-                if (node.nodeType === Node.TEXT_NODE) translateTextNode(node);
-                if (node.nodeType === Node.ELEMENT_NODE) translatePage(node);
-            });
-        });
-        observer.observe(document.body, { childList: true, subtree: true });
-    });
-    observer.observe(document.body, { childList: true, subtree: true });
-}
-
 export function initI18n() {
     document.documentElement.lang = getCurrentLanguage();
     translatePage(document);
-    observeTranslations();
 }

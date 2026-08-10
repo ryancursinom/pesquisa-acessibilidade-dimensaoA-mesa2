@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Detalhes de um item disponível no Midas.">
+    <meta name="description" content="Consulte imagens, informações, lances e opções de compra de um leilão do Midas.">
     <link rel="icon" type="image/svg+xml" href="../assets/img/favicon.svg">
     <title>Detalhes do Leilão - Midas</title>
     <link rel="stylesheet" href="../css/style.css">
@@ -13,56 +13,110 @@
     <a class="skip-link" href="#conteudo-principal">Pular para o conteúdo principal</a>
     <header class="navbar" data-site-header></header>
 
-    <main id="conteudo-principal" class="page-shell" tabindex="-1">
+    <main id="conteudo-principal" class="page-shell details-shell" tabindex="-1">
         <div class="container">
+            <nav class="details-breadcrumb" aria-label="Caminho de navegação">
+                <a href="catalogo.html">Catálogo</a>
+                <span aria-hidden="true">/</span>
+                <span aria-current="page">Detalhes do leilão</span>
+            </nav>
+
             <div id="details-state" aria-live="polite"></div>
+
             <div id="details-content" hidden>
                 <div class="details-layout">
                     <section class="details-gallery" aria-labelledby="gallery-title">
-                        <h1 id="gallery-title" class="sr-only">Galeria do item</h1>
-                        <div class="details-main-image">
+                        <h2 id="gallery-title" class="sr-only">Galeria de imagens do item</h2>
+                        <figure class="details-main-image">
                             <img id="details-main-image" src="../assets/img/item-default.svg" alt="">
-                        </div>
-                        <div id="details-thumbnails" class="thumbnail-list" aria-label="Miniaturas da galeria"></div>
+                        </figure>
+                        <div
+                            id="details-thumbnails"
+                            class="thumbnail-list"
+                            role="group"
+                            aria-label="Miniaturas da galeria. Use as setas esquerda e direita para navegar."
+                        ></div>
                     </section>
 
-                    <article class="details-panel">
+                    <article class="details-panel" aria-labelledby="details-title">
                         <p id="details-category" class="details-kicker"></p>
                         <h1 id="details-title"></h1>
-                        <p id="details-description"></p>
+                        <p id="details-description" class="details-description"></p>
+
                         <dl class="details-meta">
-                            <div><dt>Condição</dt><dd id="details-condition"></dd></div>
-                            <div><dt>Encerramento</dt><dd id="details-ends-at"></dd></div>
-                            <div><dt>Marca</dt><dd id="details-brand"></dd></div>
-                            <div><dt>Vendedor</dt><dd id="details-seller"></dd></div>
+                            <div>
+                                <dt>Condição</dt>
+                                <dd id="details-condition"></dd>
+                            </div>
+                            <div>
+                                <dt>Data e hora de encerramento</dt>
+                                <dd id="details-ends-at"></dd>
+                            </div>
+                            <div>
+                                <dt>Tempo restante</dt>
+                                <dd id="details-countdown"></dd>
+                            </div>
+                            <div>
+                                <dt>Marca</dt>
+                                <dd id="details-brand"></dd>
+                            </div>
                         </dl>
-                        <div class="details-price">
+
+                        <div id="details-price-live" class="details-price" role="status" aria-live="polite" aria-atomic="true">
                             <span id="details-price-label">Lance atual</span>
                             <strong id="details-price"></strong>
                         </div>
-                        <div id="details-buy-now-info" class="details-buy-now-info" hidden></div>
+
+                        <p id="details-buy-now-info" class="details-buy-now-info" hidden></p>
                         <p id="details-action-status" class="form-status" role="status" aria-live="polite"></p>
                     </article>
                 </div>
 
                 <section id="bid-section" class="bid-section" aria-labelledby="bid-title">
-                    <header class="section-heading"><h2 id="bid-title">Participar do leilão</h2></header>
+                    <header class="section-heading">
+                        <h2 id="bid-title">Participar do leilão</h2>
+                        <p id="bid-minimum-help" class="section-helper"></p>
+                    </header>
+
                     <div class="auction-action-layout">
                         <form id="bid-form" class="bid-form" novalidate>
                             <div class="form-field">
-                                <label for="bid-amount">Valor do lance</label>
-                                <div class="currency-field"><span class="currency-prefix" aria-hidden="true">R$</span><input id="bid-amount" name="amount" type="number" min="0.01" step="10" inputmode="decimal" aria-describedby="bid-amount-error"></div>
+                                <label for="bid-amount">Valor do novo lance</label>
+                                <div class="currency-field">
+                                    <span class="currency-prefix" aria-hidden="true">R$</span>
+                                    <input
+                                        id="bid-amount"
+                                        name="amount"
+                                        type="number"
+                                        min="0.01"
+                                        step="10"
+                                        inputmode="decimal"
+                                        required
+                                        aria-describedby="bid-minimum-help bid-amount-error"
+                                    >
+                                </div>
                                 <span id="bid-amount-error" class="field-error" aria-live="polite"></span>
                             </div>
                             <button class="btn-primary" type="submit">Dar Lance</button>
                         </form>
+
                         <div id="buy-now-action" class="buy-now-action" hidden></div>
                     </div>
                 </section>
 
                 <section class="bid-history-section" aria-labelledby="bid-history-title">
-                    <header class="section-heading"><h2 id="bid-history-title">Histórico de lances</h2></header>
-                    <div id="bid-history" class="bid-history-list" aria-live="polite"></div>
+                    <header class="section-heading">
+                        <h2 id="bid-history-title">Histórico de lances</h2>
+                        <p class="section-helper">Os valores e horários são exibidos sem identificar quem realizou cada lance.</p>
+                    </header>
+                    <div
+                        id="bid-history"
+                        class="bid-history-list"
+                        role="status"
+                        aria-live="polite"
+                        aria-atomic="false"
+                        aria-relevant="additions text"
+                    ></div>
                 </section>
             </div>
         </div>

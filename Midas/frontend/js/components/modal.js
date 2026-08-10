@@ -57,6 +57,7 @@ export function initDialog(dialog) {
     if (!dialog) return;
     ensureSurface(dialog);
     dialog.setAttribute('tabindex', '-1');
+    dialog.setAttribute('aria-modal', 'true');
     dialog.addEventListener('close', () => restoreFocus(dialog));
     dialog.addEventListener('click', (event) => {
         if (event.target === dialog) closeDialog(dialog);
