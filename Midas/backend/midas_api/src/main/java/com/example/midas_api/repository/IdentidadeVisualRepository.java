@@ -1,4 +1,8 @@
 package com.example.midas_api.repository;
 
-public interface IdentidadeVisualRepository {
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.example.midas_api.entity.IdentidadeVisual;
+
+public interface IdentidadeVisualRepository extends JpaRepository<IdentidadeVisual, Integer> {
 }
