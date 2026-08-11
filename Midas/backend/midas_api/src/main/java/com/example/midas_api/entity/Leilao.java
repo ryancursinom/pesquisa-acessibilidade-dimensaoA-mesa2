@@ -1,9 +1,9 @@
-package com.example.midas.entity;
+package com.example.midas_api.entity;
 
-import com.example.midas.entity.enums.StatusLeilao;
+import com.example.midas_api.entity.enums.StatusLeilao;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,7 +23,7 @@ public class Leilao {
     // Atributos
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @Column(name = "data_inicio",nullable = false)
     private LocalDateTime dataInicio;
@@ -34,6 +34,10 @@ public class Leilao {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private StatusLeilao status;
+
+    @Column(nullable = false)
+    @CreationTimestamp
+    private LocalDateTime criadoEm;
 
     @ToString.Exclude
     @OneToOne

@@ -1,12 +1,13 @@
-package com.example.midas.entity;
+package com.example.midas_api.entity;
 
-import com.example.midas.entity.enums.StatusProduto;
+import com.example.midas_api.entity.enums.StatusProduto;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.time.LocalDateTime;
 
 // JPA
 @Entity
@@ -23,17 +24,15 @@ public class Produto {
     // Atributos
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
-    @Column(nullable = false, length = 100)
+    @Column(nullable = false, length = 255)
     private String nome;
 
-    @Column(nullable = false, length = 500)
+    @Column(name = "url_imagem", nullable = false, length = 1024)
     private String urlImagem;
 
-
     private Integer anoFabricacao;
-
 
     private Integer anoLancamento;
 
@@ -41,16 +40,24 @@ public class Produto {
     @Size(max = 1000)
     private String resumoDescricao;
 
-    @Column(length = 50)
+    @Column(length = 100)
     private String marca;
 
     @Positive
     private Double peso;
 
+    // Lance inicial mínimo aceito quando o produto for a leilão.
+    @Column(nullable = false)
+    @Positive
+    private Double lanceMinimo;
+
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private StatusProduto status;
 
+    @Column(nullable = false)
+    @CreationTimestamp
+    private LocalDateTime criadoEm;
 
     @ToString.Exclude
     @ManyToOne
@@ -72,8 +79,9 @@ public class Produto {
     @JoinColumn(name = "id_raridade", nullable = false)
     private Raridade raridade;
 
+    // SQL: id_identidade_visual é opcional (ON DELETE SET NULL, sem NOT NULL).
     @ToString.Exclude
-    @OneToOne
-    @JoinColumn(name = "id_identidade_visual", nullable = false)
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "id_identidade_visual")
     private IdentidadeVisual identidadeVisual;
 }

@@ -1,6 +1,5 @@
-package com.example.midas.entity;
+package com.example.midas_api.entity;
 
-import com.example.midas.entity.enums.StatusUsuario;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -23,7 +22,7 @@ public class Usuario {
     // Atributos
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @Column(nullable = false, length = 150)
     private String nome;
@@ -34,22 +33,25 @@ public class Usuario {
     @Column(nullable = false, length = 50, unique = true)
     private String email;
 
-    @Column(nullable = false, length = 100)
+    // Nome do campo Java continua "senha" por simplicidade, mas a coluna real
+    // é "senha_hash": o valor gravado aqui SEMPRE precisa ser o hash (BCrypt),
+    // nunca a senha em texto puro — ver PasswordEncoder no UsuarioService.
+    @Column(name = "senha_hash", nullable = false, length = 255)
     private String senha;
 
     @Column(nullable = false)
     @CreationTimestamp
     private LocalDateTime dataCadastro;
 
-    private Double avaliacaoMedia;
+    @Builder.Default
+    private Double avaliacaoMedia = 0.0;
 
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private StatusUsuario status;
+    // A tabela "usuario" do script SQL não tem coluna de status/ativo.
+    // Sem este campo não será possível implementar o soft delete
 
     @ToString.Exclude
     @OneToOne
-    @JoinColumn(name = "id_endereco", nullable = false)
+    @JoinColumn(name = "id_endereco") // SQL permite null (ON DELETE SET NULL)
     private Endereco endereco;
 
     // Atributos mapeados

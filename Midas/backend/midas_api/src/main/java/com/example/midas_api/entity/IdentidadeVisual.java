@@ -1,7 +1,6 @@
-package com.example.midas.entity;
+package com.example.midas_api.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 // JPA
@@ -19,7 +18,7 @@ public class IdentidadeVisual {
     // Atributos
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
     @Column(nullable = false, length = 30)
     private String corPrimaria;
 

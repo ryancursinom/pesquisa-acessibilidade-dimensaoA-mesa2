@@ -1,8 +1,6 @@
-package com.example.midas.entity;
+package com.example.midas_api.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 //JPA
@@ -20,29 +18,29 @@ public class Endereco{
     // Atributos
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
-    @Column(nullable = false, length = 9)
+    @Column(nullable = false, length = 10)
     private String cep;
 
-    @Column(nullable = false, length = 50)
+    @Column(nullable = false, length = 255)
     private String logradouro;
 
-    @Column(nullable = false, length = 50)
+    @Column(nullable = false, length = 100)
     private String bairro;
 
-    @Column(nullable = false, length = 30)
+    @Column(nullable = false, length = 100)
     private String cidade;
 
-    @Column(nullable = false)
-    private String numero;
+    private Integer numero;
 
-    @Column(nullable = false, length = 30)
+    @Column(nullable = false, length = 2)
     private String estado;
 
-    @Column(nullable = false, length = 30)
-    private String pais;
+    @Builder.Default
+    @Column(nullable = false, length = 50)
+    private String pais = "Brasil";
 
-    @Column(length = 50)
+    @Column(length = 255)
     private String complemento;
 }

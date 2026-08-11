@@ -1,7 +1,6 @@
-package com.example.midas.entity;
+package com.example.midas_api.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
@@ -20,7 +19,7 @@ public class EstadoFisico {
     // Atributos
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @Column(nullable = false, unique = true, length = 100)
     private String nome;
