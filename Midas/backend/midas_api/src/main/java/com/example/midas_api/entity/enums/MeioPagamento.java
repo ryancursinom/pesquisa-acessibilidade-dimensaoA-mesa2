@@ -1,4 +1,4 @@
-package com.example.midas.entity.enums;
+package com.example.midas_api.entity.enums;
 
 public enum MeioPagamento {
     PIX,

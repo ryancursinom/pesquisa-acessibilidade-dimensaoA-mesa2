@@ -1,7 +1,9 @@
-package com.example.midas.entity.enums;
+package com.example.midas_api.entity.enums;
 
 public enum StatusPagamento {
     PENDENTE,
-    PAGO,
-    CANCELADO
+    PROCESSANDO,
+    APROVADO,
+    RECUSADO,
+    ESTORNADO
 }

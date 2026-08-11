@@ -1,7 +1,8 @@
-package com.example.midas.entity.enums;
+package com.example.midas_api.entity.enums;
 
 public enum StatusLeilao {
-    ABERTO,
-    ENCERRADO,
+    AGUARDANDO,
+    ATIVO,
+    FINALIZADO,
     CANCELADO
 }

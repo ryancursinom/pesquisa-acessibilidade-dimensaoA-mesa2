@@ -1,8 +1,7 @@
-package com.example.midas.entity.enums;
+package com.example.midas_api.entity.enums;
 
 public enum StatusProduto {
     DISPONIVEL,
     EM_LEILAO,
-    VENDIDO,
-    CANCELADO
+    VENDIDO
 }
