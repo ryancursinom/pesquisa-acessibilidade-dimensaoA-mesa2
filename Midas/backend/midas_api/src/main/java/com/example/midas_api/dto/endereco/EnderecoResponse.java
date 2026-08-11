@@ -1,7 +1,7 @@
-package com.example.midas_api.dto.response;
+package com.example.midas_api.dto.endereco;
 
 public record EnderecoResponse(
-        Long id,
+        Integer id,
 
         String cep,
 
@@ -11,7 +11,7 @@ public record EnderecoResponse(
 
         String cidade,
 
-        String numero,
+        Integer numero,
 
         String estado,
 

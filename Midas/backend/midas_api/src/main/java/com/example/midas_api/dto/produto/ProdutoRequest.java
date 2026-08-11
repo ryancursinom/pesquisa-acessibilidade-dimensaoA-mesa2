@@ -1,18 +1,20 @@
 package com.example.midas_api.dto.produto;
 
-import com.example.midas_api.dto.request.IdentidadeVisualRequestDto;
+import com.example.midas_api.dto.identidadeVisual.IdentidadeVisualRequest;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 
-public record ProdutoRequestDto(
+public record ProdutoRequest(
         @NotBlank
-        @Size (max = 100)
+        @Size(max = 255)
         String nome,
 
         @NotBlank
-        @Size(max = 255)
+        @Size(max = 1024)
         String urlImagem,
 
         @Positive
@@ -25,22 +27,27 @@ public record ProdutoRequestDto(
         @Size(max = 1000)
         String resumoDescricao,
 
-        @Size(max = 70)
+        @Size(max = 100)
         String marca,
 
         @Positive
         Double peso,
 
         @NotNull
-        Long categoria,
+        @PositiveOrZero
+        Double lanceMinimo,
 
         @NotNull
-        Long estadoFisico,
+        Integer categoriaId,
 
         @NotNull
-        Long raridade,
+        Integer estadoFisicoId,
 
         @NotNull
-        IdentidadeVisualRequestDto identidadeVisualRequestDto
+        Integer raridadeId,
+
+        // Opcional: no banco, id_identidade_visual aceita NULL (ON DELETE SET NULL)
+        @Valid
+        IdentidadeVisualRequest identidadeVisual
 )
 {}

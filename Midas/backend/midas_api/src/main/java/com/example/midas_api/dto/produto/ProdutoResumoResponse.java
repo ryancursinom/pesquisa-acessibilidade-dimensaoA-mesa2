@@ -2,12 +2,14 @@ package com.example.midas_api.dto.produto;
 
 import com.example.midas_api.entity.enums.StatusProduto;
 
-public record ProdutoResumoResponseDto(
-        Long id,
+public record ProdutoResumoResponse(
+        Integer id,
 
         String nome,
 
         String urlImagem,
+
+        Double lanceMinimo,
 
         StatusProduto status
 ) {}

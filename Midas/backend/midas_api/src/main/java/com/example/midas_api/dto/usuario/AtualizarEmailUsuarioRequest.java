@@ -1,4 +1,12 @@
 package com.example.midas_api.dto.usuario;
 
-public record AtualizarEmailUsuarioRequest() {
+import jakarta.validation.constraints.Email;
+
+public record AtualizarEmailUsuarioRequest(
+
+        String senha,
+
+        @Email
+        String emailNovo
+) {
 }

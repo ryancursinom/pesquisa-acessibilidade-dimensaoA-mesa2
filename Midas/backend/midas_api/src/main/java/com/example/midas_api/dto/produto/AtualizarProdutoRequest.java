@@ -1,40 +1,43 @@
 package com.example.midas_api.dto.produto;
 
-import com.example.midas_api.dto.request.IdentidadeVisualRequestDto;
+import com.example.midas_api.dto.identidadeVisual.AtualizarIdentidadeVisualRequest;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 
-public record AtualizarProdutoRequestDto(
+public record AtualizarProdutoRequest(
 
-      @Size(max = 100)
-      String nome,
+        @Size(max = 255)
+        String nome,
 
-      @Size(max = 255)
-      String imagem,
+        @Size(max = 1024)
+        String imagem,
 
-      @Positive
-      Integer anoFabricacao,
+        @Positive
+        Integer anoFabricacao,
 
-      @Positive
-      Integer anoLancamento,
+        @Positive
+        Integer anoLancamento,
 
-      @Size(max = 1000)
-      String resumoDescricao,
+        @Size(max = 1000)
+        String resumoDescricao,
 
-      @Size(max = 70)
-      String marca,
+        @Size(max = 100)
+        String marca,
 
-      @Positive
-      Double peso,
+        @Positive
+        Double peso,
 
-      Long categoria,
+        @PositiveOrZero
+        Double lanceMinimo,
 
-      Long estadoFisico,
+        Integer categoria,
 
-      Long raridade,
+        Integer estadoFisico,
 
-      @Valid
-      IdentidadeVisualRequestDto identidadeVisualRequestDto
+        Integer raridade,
+
+        @Valid
+        AtualizarIdentidadeVisualRequest identidadeVisual
 ) {}

@@ -2,13 +2,13 @@ package com.example.midas_api.dto.lance;
 
 import jakarta.validation.constraints.NotNull;
 
-public record LanceRequestDto(
+public record LanceRequest(
         @NotNull
         double valor,
 
         @NotNull
-        Long leilaoId,
+        Integer leilaoId,
 
         @NotNull
-        Long usuarioId
+        Integer usuarioId
 ) {}

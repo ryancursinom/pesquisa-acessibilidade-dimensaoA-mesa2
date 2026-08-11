@@ -1,6 +1,9 @@
 package com.example.midas_api.dto.leilao;
 
-public record LeiloResumoResponse(
-        Long id
+import com.example.midas_api.entity.enums.StatusLeilao;
+
+public record LeilaoResumoResponse(
+        Integer id,
+        StatusLeilao status
 ) {
 }

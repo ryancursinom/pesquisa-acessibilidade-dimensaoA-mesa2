@@ -1,7 +1,8 @@
 package com.example.midas_api.dto.usuario;
 
-public record UsuarioResumoResponse(
-        Integer id,
+public record AtualizarUsuarioRequest(
+        String nome,
+
         String username
 )
 {}

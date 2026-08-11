@@ -1,4 +1,8 @@
 package com.example.midas_api.dto.favorito;
 
-public record FavoritoRequest() {
-}
+import jakarta.validation.constraints.NotNull;
+
+public record FavoritoRequest(
+        @NotNull
+        Integer leilaoId
+) {}

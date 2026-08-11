@@ -1,6 +1,6 @@
 package com.example.midas_api.dto.telefone;
 
-public record AtualizarTelefoneRequest(
+public record TelefoneResponse(
+        Integer id,
         String telefone
-)
-{}
+) {}
