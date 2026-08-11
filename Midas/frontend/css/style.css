@@ -14,6 +14,11 @@
     --text-muted-light: #5C5446;
     --text-muted-dark: #C3C0B8;
     --card-bg: #FFFFFF;
+    --auction-card-bg: #1B1C20;
+    --auction-card-border: #34363D;
+    --auction-card-text: #F4F3F0;
+    --auction-card-muted: #B9B6AE;
+    --auction-card-media: #121316;
     --border-color: #D7D7D7;
     --border-light: #CFC4A8;
     --border-dark: #3C3D43;
@@ -57,6 +62,11 @@ html[data-theme='light'] {
     --text-grey: #5C5446;
     --text-muted-dark: #655B48;
     --card-bg: #FFFFFF;
+    --auction-card-bg: #FFFFFF;
+    --auction-card-border: #D8CCAF;
+    --auction-card-text: #211B10;
+    --auction-card-muted: #655B48;
+    --auction-card-media: #F1E9D5;
     --border-color: #D8CCAF;
     --border-dark: #C9B98F;
     --page-bg: #FBF8F0;
@@ -87,6 +97,11 @@ html[data-contrast='high'] {
     --text-grey: #FFFFFF;
     --text-muted-dark: #FFFFFF;
     --card-bg: #000000;
+    --auction-card-bg: #000000;
+    --auction-card-border: #FFFFFF;
+    --auction-card-text: #FFFFFF;
+    --auction-card-muted: #FFFFFF;
+    --auction-card-media: #111111;
     --border-dark: #FFFFFF;
     --border-color: #FFFFFF;
     --page-bg: #000000;
@@ -432,6 +447,34 @@ html[data-theme='light'] :focus-visible {
     background: rgba(239, 68, 68, 0.12);
 }
 
+.back-button {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 28px;
+    padding: 8px 0;
+    border: 0;
+    background: transparent;
+    color: var(--text-muted-dark);
+    font-weight: 800;
+}
+
+.back-button:hover {
+    color: var(--primary-gold-hover);
+}
+
+.flow-header {
+    border-bottom: 1px solid var(--border-dark);
+    background: var(--page-bg);
+}
+
+.flow-header__content {
+    display: flex;
+    min-height: 72px;
+    align-items: center;
+}
+
 .form-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -517,7 +560,16 @@ html[data-theme='light'] .field-error {
 }
 
 .form-actions {
-    margin-top: 24px;
+    margin-top: 12px;
+}
+
+form > .form-field + .form-actions {
+    margin-top: -8px;
+}
+
+.auth-form > .form-field + .btn-primary,
+.auth-form > .field-error + .btn-primary {
+    margin-top: -6px;
 }
 
 .form-status {
@@ -587,29 +639,38 @@ html[data-theme='light'] .form-status--success {
 
 .auction-card {
     overflow: hidden;
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--auction-card-border);
     border-radius: var(--radius-md);
-    background: var(--card-bg);
-    color: var(--text-dark);
-    transition: transform 160ms ease, box-shadow 160ms ease;
+    background: var(--auction-card-bg);
+    color: var(--auction-card-text);
+    transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
 }
 
 .auction-card:hover {
+    border-color: #5B5D66;
     box-shadow: var(--shadow-card);
     transform: translateY(-3px);
 }
 
+html[data-theme='light'] .auction-card:hover {
+    border-color: #AF9860;
+}
+
 .card-media {
     position: relative;
-    height: 220px;
+    aspect-ratio: 4 / 3;
+    width: 100%;
     overflow: hidden;
-    background: #727272;
+    background: var(--auction-card-media);
 }
 
 .card-image {
+    display: block;
     width: 100%;
     height: 100%;
+    max-width: none;
     object-fit: cover;
+    object-position: center;
 }
 
 .card-badge {
@@ -630,7 +691,11 @@ html[data-theme='light'] .form-status--success {
 }
 
 .card-badge--closed {
-    background: #1F7A3A;
+    background: #4B5563;
+}
+
+.card-badge--pending {
+    background: #6B5317;
 }
 
 .card-wishlist,
@@ -643,15 +708,39 @@ html[data-theme='light'] .form-status--success {
     height: 44px;
     align-items: center;
     justify-content: center;
-    border: 1px solid #BDBDBD;
+    border: 1px solid #565860;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.95);
-    color: #B91C1C;
-    font-size: 1.3rem;
+    background: rgba(20, 21, 25, 0.94);
+    color: #F4F3F0;
+}
+
+.card-wishlist:hover,
+.card-edit:hover {
+    border-color: var(--primary-gold);
+    color: var(--primary-gold-hover);
+}
+
+.card-wishlist--active {
+    border-color: var(--primary-gold);
+    background: #2B250E;
+    color: var(--primary-gold-hover);
 }
 
 .card-edit {
-    color: #111111;
+    color: #F4F3F0;
+}
+
+html[data-theme='light'] .card-wishlist,
+html[data-theme='light'] .card-edit {
+    border-color: #C9B98F;
+    background: rgba(255, 253, 248, 0.96);
+    color: #4F4738;
+}
+
+html[data-theme='light'] .card-wishlist--active {
+    border-color: var(--gold-ink);
+    background: #FFF3C4;
+    color: #745C00;
 }
 
 .card-timer {
@@ -660,11 +749,18 @@ html[data-theme='light'] .form-status--success {
     left: 12px;
     min-height: 28px;
     padding: 5px 9px;
+    border: 1px solid #4B4D55;
     border-radius: 999px;
-    background: #FFFFFF;
-    color: #111111;
+    background: rgba(16, 17, 20, 0.92);
+    color: #F4F3F0;
     font-size: 0.75rem;
     font-weight: 700;
+}
+
+html[data-theme='light'] .card-timer {
+    border-color: #D8CCAF;
+    background: rgba(255, 253, 248, 0.95);
+    color: #211B10;
 }
 
 .card-content {
@@ -672,7 +768,7 @@ html[data-theme='light'] .form-status--success {
 }
 
 .card-category {
-    color: #555555;
+    color: var(--auction-card-muted);
     font-size: 0.8rem;
 }
 
@@ -699,7 +795,7 @@ html[data-theme='light'] .form-status--success {
 .bid-label {
     display: block;
     margin-bottom: 2px;
-    color: #5B5B5B;
+    color: var(--auction-card-muted);
     font-size: 0.78rem;
 }
 
@@ -711,8 +807,8 @@ html[data-theme='light'] .form-status--success {
 .card-footer {
     margin-top: 12px;
     padding-top: 10px;
-    border-top: 1px solid var(--border-color);
-    color: #575757;
+    border-top: 1px solid var(--auction-card-border);
+    color: var(--auction-card-muted);
     font-size: 0.78rem;
 }
 
@@ -948,10 +1044,6 @@ html[data-theme='light'] .success-state {
         grid-template-columns: 1fr;
     }
 
-    .card-media {
-        height: 210px;
-    }
-
     .rating-options {
         gap: 6px;
     }
@@ -1100,10 +1192,22 @@ html[data-theme='light'] .cart-count {
 }
 
 .card-buy-now-hint {
-    margin-top: 10px;
-    color: #624B00;
-    font-size: 0.8rem;
+    display: inline-flex;
+    width: fit-content;
+    margin: 10px 0 16px;
+    padding: 5px 9px;
+    border: 1px solid #5E542D;
+    border-radius: 999px;
+    background: #26220F;
+    color: #E8D47A;
+    font-size: 0.78rem;
     font-weight: 700;
+}
+
+html[data-theme='light'] .card-buy-now-hint {
+    border-color: #C7AE59;
+    background: #FFF5D4;
+    color: #5D4700;
 }
 
 
@@ -1449,5 +1553,15 @@ html[data-contrast='high'] [tabindex]:focus-visible {
 }
 
 html[data-theme='light'][data-contrast='high'] .navbar .nav-links a {
+    color: #FFFFFF;
+}
+
+[data-theme="light"] .card-badge--closed {
+    background: #4B5563;
+    color: #FFFFFF;
+}
+
+[data-theme="light"] .card-badge--pending {
+    background: #7A5B12;
     color: #FFFFFF;
 }

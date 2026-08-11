@@ -1,4 +1,6 @@
 import { categorySupportsBrand } from '../components/catalogConfig.js';
+import { clearElement, createElement } from '../components/dom.js';
+import { createIcon } from '../components/icons.js';
 import { clearFieldError, focusFirstInvalid, setFieldError, validatePositiveNumber, validateRequired } from '../components/formValidation.js';
 import { getUserErrorMessage } from '../components/userError.js';
 import { setLiveMessage } from '../components/statusMessage.js';
@@ -8,16 +10,15 @@ import { t } from '../services/i18n.js';
 const form = document.getElementById('create-auction-form');
 const status = document.getElementById('create-auction-status');
 const title = document.getElementById('create-auction-title');
+const submitButton = document.getElementById('auction-submit-button');
 const editId = new URLSearchParams(window.location.search).get('id');
 const buyNowField = document.getElementById('auction-buy-now-field');
 const customEndField = document.getElementById('auction-custom-end-field');
 const brandField = document.getElementById('auction-brand-field');
-const preview = document.getElementById('auction-image-preview');
-const previewImage = document.getElementById('auction-preview-image');
-const removeImageButton = document.getElementById('auction-remove-image');
-let existingImageUrl = '';
-let imageRemoved = false;
-let previewObjectUrl = '';
+const imagePreview = document.getElementById('auction-images-preview');
+
+let existingImageUrls = [];
+let selectedImages = [];
 
 const fields = {
     name: document.getElementById('auction-name'),
@@ -30,7 +31,7 @@ const fields = {
     endDate: document.getElementById('auction-end-date'),
     condition: document.getElementById('auction-condition'),
     brand: document.getElementById('auction-brand'),
-    image: document.getElementById('auction-image')
+    images: document.getElementById('auction-images')
 };
 
 function isBuyNowEnabled() {
@@ -58,42 +59,77 @@ function updateBrandField() {
     if (!visible) fields.brand.value = '';
 }
 
-function revokePreviewUrl() {
-    if (previewObjectUrl) URL.revokeObjectURL(previewObjectUrl);
-    previewObjectUrl = '';
+function revokeSelectedImage(image) {
+    if (image.previewUrl) URL.revokeObjectURL(image.previewUrl);
 }
 
-function showImagePreview(src, alt = t('Prévia da imagem de capa')) {
-    previewImage.src = src;
-    previewImage.alt = alt;
-    preview.hidden = false;
+function removeExistingImage(index) {
+    existingImageUrls.splice(index, 1);
+    renderImagePreviews();
+}
+
+function removeSelectedImage(index) {
+    revokeSelectedImage(selectedImages[index]);
+    selectedImages.splice(index, 1);
+    renderImagePreviews();
+}
+
+function createPreviewCard(src, label, onRemove, number) {
+    const card = createElement('figure', { className: 'image-preview-card' });
+    const image = createElement('img', { attrs: { src, alt: label } });
+    const button = createElement('button', {
+        className: 'btn-danger image-preview-remove',
+        text: t('Remover'),
+        attrs: { type: 'button', 'aria-label': t('Remover imagem {number}', { number }) }
+    });
+    button.prepend(createIcon('trash'));
+    button.addEventListener('click', onRemove);
+    card.append(image, button);
+    return card;
+}
+
+function renderImagePreviews() {
+    clearElement(imagePreview);
+    let number = 1;
+
+    existingImageUrls.forEach((url, index) => {
+        imagePreview.appendChild(createPreviewCard(
+            url, t('Imagem atual {number} do leilão', { number }),
+            () => removeExistingImage(index), number++
+        ));
+    });
+
+    selectedImages.forEach((image, index) => {
+        imagePreview.appendChild(createPreviewCard(
+            image.previewUrl, t('Prévia da nova imagem {number}', { number }),
+            () => removeSelectedImage(index), number++
+        ));
+    });
+
+    imagePreview.hidden = number === 1;
+}
+
+function addSelectedImages(files) {
+    const knownFiles = new Set(selectedImages.map(({ file }) => `${file.name}-${file.size}-${file.lastModified}`));
+    [...files].forEach((file) => {
+        const key = `${file.name}-${file.size}-${file.lastModified}`;
+        if (!file.type.startsWith('image/') || knownFiles.has(key)) return;
+        selectedImages.push({ file, previewUrl: URL.createObjectURL(file) });
+        knownFiles.add(key);
+    });
 }
 
 function handleImageSelection() {
-    clearFieldError(fields.image);
-    const [file] = fields.image.files;
-    if (!file) return;
-    revokePreviewUrl();
-    previewObjectUrl = URL.createObjectURL(file);
-    imageRemoved = false;
-    showImagePreview(previewObjectUrl, t('Prévia da nova imagem de capa'));
+    clearFieldError(fields.images);
+    addSelectedImages(fields.images.files);
+    fields.images.value = '';
+    renderImagePreviews();
 }
 
-function removeSelectedImage() {
-    fields.image.value = '';
-    imageRemoved = true;
-    revokePreviewUrl();
-    preview.hidden = true;
-    previewImage.removeAttribute('src');
-    clearFieldError(fields.image);
-}
-
-function validateImage() {
-    const hasNewFile = fields.image.files.length === 1;
-    const hasExisting = Boolean(existingImageUrl) && !imageRemoved;
-    const valid = hasNewFile || hasExisting;
-    if (!valid) setFieldError(fields.image, t('Selecione uma imagem de capa para continuar.'));
-    else clearFieldError(fields.image);
+function validateImages() {
+    const valid = existingImageUrls.length + selectedImages.length > 0;
+    if (!valid) setFieldError(fields.images, t('Selecione pelo menos uma imagem do item para continuar.'));
+    else clearFieldError(fields.images);
     return valid;
 }
 
@@ -123,7 +159,7 @@ function validateForm() {
         validateRequired(fields.description, 'Descrição'),
         validatePositiveNumber(fields.value, 'Valor inicial', 0),
         validateBuyNow(), validateEndDate(),
-        validateRequired(fields.condition, 'Condição do Item'), validateImage()
+        validateRequired(fields.condition, 'Condição do Item'), validateImages()
     ];
     if (checks.includes(false)) focusFirstInvalid(form);
     return checks.every(Boolean);
@@ -138,7 +174,8 @@ function calculateEndDate() {
 function buildPayload() {
     const payload = new FormData(form);
     const startingBid = Number(fields.value.value);
-    payload.set('saleType', 'AUCTION');
+    payload.delete('saleType');
+    payload.delete('images');
     payload.set('value', String(startingBid));
     payload.set('startingBid', String(startingBid));
     payload.set('endDate', calculateEndDate());
@@ -146,15 +183,14 @@ function buildPayload() {
     payload.delete('customEndDate');
     if (!isBuyNowEnabled()) payload.delete('buyNowPrice');
     else payload.set('buyNowPrice', String(Number(fields.buyNowValue.value)));
-    if (!fields.image.files.length) payload.delete('image');
-    if (editId && imageRemoved && !fields.image.files.length) payload.set('removeImage', 'true');
+    if (editId) payload.set('existingImageUrls', JSON.stringify(existingImageUrls));
+    selectedImages.forEach(({ file }) => payload.append('images', file));
     return payload;
 }
 
 async function handleSubmit(event) {
     event.preventDefault();
     if (!validateForm()) return;
-    const submitButton = form.querySelector('[type="submit"]');
     submitButton.disabled = true;
     setLiveMessage(status, t(editId ? 'Salvando alterações...' : 'Publicando item...'));
     try {
@@ -176,10 +212,10 @@ function toLocalDateTime(value) {
     return new Date(date.getTime() - offset).toISOString().slice(0, 16);
 }
 
-function fillImage(auction) {
-    existingImageUrl = auction.imageUrl || '';
-    imageRemoved = false;
-    if (existingImageUrl) showImagePreview(existingImageUrl, auction.imageAlt || t('Imagem atual do leilão'));
+function fillImages(auction) {
+    const urls = Array.isArray(auction.imageUrls) ? auction.imageUrls : [];
+    existingImageUrls = urls.length ? urls.filter(Boolean) : [auction.imageUrl].filter(Boolean);
+    renderImagePreviews();
 }
 
 function fillEditForm(auction) {
@@ -193,9 +229,12 @@ function fillEditForm(auction) {
     fields.buyNowValue.value = auction.buyNowPrice || '';
     fields.duration.value = 'custom';
     fields.endDate.value = toLocalDateTime(auction.endsAt);
-    fillImage(auction);
-    updateSaleTypeFields(); updateDurationFields(); updateBrandField();
+    fillImages(auction);
+    updateSaleTypeFields();
+    updateDurationFields();
+    updateBrandField();
     title.textContent = t('Editar Leilão');
+    submitButton.textContent = t('Salvar alterações');
 }
 
 async function loadEditData() {
@@ -209,6 +248,11 @@ async function loadEditData() {
     }
 }
 
+function releaseImagePreviews() {
+    selectedImages.forEach(revokeSelectedImage);
+    selectedImages = [];
+}
+
 Object.values(fields).forEach((field) => {
     field.addEventListener('input', () => clearFieldError(field));
     field.addEventListener('change', () => clearFieldError(field));
@@ -216,10 +260,9 @@ Object.values(fields).forEach((field) => {
 fields.saleType.addEventListener('change', updateSaleTypeFields);
 fields.duration.addEventListener('change', updateDurationFields);
 fields.category.addEventListener('change', updateBrandField);
-fields.image.addEventListener('change', handleImageSelection);
-removeImageButton.addEventListener('click', removeSelectedImage);
+fields.images.addEventListener('change', handleImageSelection);
 form.addEventListener('submit', handleSubmit);
-window.addEventListener('pagehide', revokePreviewUrl);
+window.addEventListener('pagehide', releaseImagePreviews);
 updateSaleTypeFields();
 updateDurationFields();
 updateBrandField();

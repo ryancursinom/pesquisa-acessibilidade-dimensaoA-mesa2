@@ -1,40 +1,20 @@
 .details-page {
-    background: var(--bg-dark);
+    background: var(--page-bg);
     color: var(--text-white);
 }
 
 .details-shell {
-    min-height: 70vh;
-}
-
-.details-breadcrumb {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 28px;
-    color: var(--text-muted-dark);
-    font-size: 0.9rem;
-}
-
-.details-breadcrumb a {
-    display: inline-flex;
-    min-height: 44px;
-    align-items: center;
-    color: var(--primary-gold-hover);
-    text-decoration: underline;
-    text-underline-offset: 3px;
+    min-height: 76vh;
 }
 
 .details-layout {
     display: grid;
-    grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+    grid-template-columns: minmax(0, 1.12fr) minmax(320px, 0.88fr);
     gap: 48px;
     align-items: start;
 }
 
-.details-gallery {
-    display: grid;
-    gap: 14px;
+.details-image-section {
     min-width: 0;
 }
 
@@ -42,43 +22,16 @@
     overflow: hidden;
     border: 1px solid var(--border-dark);
     border-radius: var(--radius-lg);
-    background: var(--bg-dark-elevated);
+    background: var(--surface);
 }
 
 .details-main-image img {
+    display: block;
     width: 100%;
     aspect-ratio: 4 / 3;
     object-fit: contain;
-    background: var(--bg-dark-soft);
-}
-
-.thumbnail-list {
-    display: grid;
-    grid-template-columns: repeat(5, minmax(72px, 1fr));
-    gap: 10px;
-    overflow-x: auto;
-    padding: 2px;
-}
-
-.thumbnail-button {
-    min-width: 72px;
-    min-height: 72px;
-    overflow: hidden;
-    border: 2px solid transparent;
-    border-radius: 8px;
-    background: var(--bg-dark-elevated);
-    cursor: pointer;
-}
-
-.thumbnail-button:hover,
-.thumbnail-button[aria-current='true'] {
-    border-color: var(--primary-gold);
-}
-
-.thumbnail-button img {
-    width: 100%;
-    height: 72px;
-    object-fit: cover;
+    object-position: center;
+    background: var(--surface-strong);
 }
 
 .details-panel {
@@ -87,7 +40,7 @@
     padding: 28px;
     border: 1px solid var(--border-dark);
     border-radius: var(--radius-lg);
-    background: var(--bg-dark-elevated);
+    background: var(--surface);
 }
 
 .details-kicker {
@@ -118,7 +71,7 @@
     padding: 12px;
     border: 1px solid var(--border-dark);
     border-radius: 8px;
-    background: var(--bg-dark-soft);
+    background: var(--surface-strong);
 }
 
 .details-meta dt {
@@ -176,29 +129,31 @@
 
 .auction-action-layout {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(240px, 0.7fr);
+    grid-template-columns: minmax(0, 1fr) minmax(240px, 0.55fr);
     gap: 18px;
-    align-items: end;
+    align-items: start;
 }
 
 .bid-form {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 14px;
-    align-items: end;
+    align-items: start;
 }
 
 .bid-form .form-field {
     min-width: 0;
 }
 
-.bid-form .btn-primary,
+.bid-submit-button,
 .buy-now-action .btn-primary {
     min-height: 46px;
+    margin-top: 31px;
 }
 
 .buy-now-action {
     display: grid;
+    align-items: start;
 }
 
 .buy-now-action .btn-primary {
@@ -225,7 +180,7 @@
     padding: 14px 16px;
     border: 1px solid var(--border-dark);
     border-radius: 8px;
-    background: var(--bg-dark-elevated);
+    background: var(--surface);
 }
 
 .bid-history-info {
@@ -243,21 +198,9 @@
     font-size: 1rem;
 }
 
-html[data-theme='light'] .details-kicker {
+html[data-theme='light'] .details-kicker,
+html[data-theme='light'] .bid-history-value {
     color: var(--gold-ink);
-}
-
-html[data-theme='light'] .details-breadcrumb {
-    color: #5C5446;
-}
-
-html[data-theme='light'] .details-breadcrumb a {
-    color: #624B00;
-}
-
-html[data-theme='light'] .details-main-image img,
-html[data-theme='light'] .details-meta div {
-    background: #F4F2EC;
 }
 
 html[data-theme='light'] .details-price {
@@ -276,15 +219,8 @@ html[data-theme='light'] .details-description {
     color: #5C5446;
 }
 
-html[data-theme='light'] .bid-history-value {
-    color: #624B00;
-}
-
-
-html[data-contrast='high'] .details-page,
 html[data-contrast='high'] .details-main-image,
 html[data-contrast='high'] .details-main-image img,
-html[data-contrast='high'] .thumbnail-button,
 html[data-contrast='high'] .details-panel,
 html[data-contrast='high'] .details-meta div,
 html[data-contrast='high'] .details-price,
@@ -294,7 +230,6 @@ html[data-contrast='high'] .bid-history-item {
     color: #FFFFFF;
 }
 
-html[data-contrast='high'] .details-breadcrumb,
 html[data-contrast='high'] .details-description,
 html[data-contrast='high'] .details-meta dt,
 html[data-contrast='high'] .details-price span,
@@ -304,7 +239,6 @@ html[data-contrast='high'] .bid-history-item time {
     color: #FFFFFF;
 }
 
-html[data-contrast='high'] .details-breadcrumb a,
 html[data-contrast='high'] .details-kicker,
 html[data-contrast='high'] .details-price strong,
 html[data-contrast='high'] .bid-history-value {
@@ -315,16 +249,17 @@ html[data-contrast='high'] .bid-history-value {
     .details-layout {
         grid-template-columns: 1fr;
     }
-
-    .thumbnail-list {
-        grid-template-columns: repeat(4, minmax(72px, 1fr));
-    }
 }
 
 @media (max-width: 760px) {
     .auction-action-layout,
     .bid-form {
         grid-template-columns: 1fr;
+    }
+
+    .bid-submit-button,
+    .buy-now-action .btn-primary {
+        margin-top: 0;
     }
 }
 
@@ -337,14 +272,44 @@ html[data-contrast='high'] .bid-history-value {
         grid-template-columns: 1fr;
     }
 
-    .thumbnail-list {
-        grid-auto-columns: 84px;
-        grid-auto-flow: column;
-        grid-template-columns: none;
-    }
-
     .bid-history-item {
         align-items: flex-start;
         flex-direction: column;
     }
+}
+
+.owner-read-only-message {
+    display: grid;
+    gap: 5px;
+    margin-top: 54px;
+    padding: 16px 18px;
+    border-left: 3px solid var(--primary-gold);
+    background: var(--surface);
+    color: var(--text-muted-dark);
+}
+
+.owner-read-only-message[hidden] {
+    display: none;
+}
+
+.owner-read-only-message strong {
+    color: var(--text-white);
+}
+
+html[data-theme='light'] .owner-read-only-message {
+    color: #5C5446;
+}
+
+html[data-theme='light'] .owner-read-only-message strong {
+    color: #201C0D;
+}
+
+html[data-contrast='high'] .owner-read-only-message {
+    border-color: #FFD84D;
+    background: #000000;
+    color: #FFFFFF;
+}
+
+html[data-contrast='high'] .owner-read-only-message strong {
+    color: #FFD84D;
 }

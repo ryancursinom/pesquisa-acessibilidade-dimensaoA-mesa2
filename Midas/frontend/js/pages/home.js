@@ -5,6 +5,7 @@ import { renderState } from '../components/statusMessage.js';
 import { getAuctions, setFavorite } from '../services/auctionService.js';
 import { normalizeCollection } from '../services/api.js';
 import { t } from '../services/i18n.js';
+import { isAuctionClosed } from '../components/auctionStatus.js';
 
 const featuredGrid = document.getElementById('featured-grid');
 const endingGrid = document.getElementById('ending-grid');
@@ -25,14 +26,14 @@ function renderAuctionList(container, items, emptyMessage) {
 
 function getFeatured(items) {
     return [...items]
-        .filter((item) => item.status !== 'CLOSED')
+        .filter((item) => !isAuctionClosed(item.status))
         .sort((a, b) => Number(b.currentBid || b.startingBid || 0) - Number(a.currentBid || a.startingBid || 0))
         .slice(0, 3);
 }
 
 function getEndingSoon(items) {
     return [...items]
-        .filter((item) => item.status !== 'CLOSED' && item.endsAt)
+        .filter((item) => !isAuctionClosed(item.status) && item.endsAt)
         .sort((a, b) => new Date(a.endsAt) - new Date(b.endsAt))
         .slice(0, 8);
 }

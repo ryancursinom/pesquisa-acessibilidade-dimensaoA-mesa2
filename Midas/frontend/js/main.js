@@ -33,6 +33,29 @@ function initGlobalNavigation() {
     document.addEventListener('click', handleInternalNavigation);
 }
 
+
+function handleBackNavigation(event) {
+    const button = event.target.closest('[data-back-button]');
+    if (!button) return;
+
+    const fallback = button.dataset.backFallback || '../index.html';
+    const referrer = document.referrer;
+
+    if (referrer) {
+        const referrerUrl = new URL(referrer);
+        if (referrerUrl.origin === window.location.origin) {
+            window.history.back();
+            return;
+        }
+    }
+
+    window.location.href = fallback;
+}
+
+function initBackButtons() {
+    document.addEventListener('click', handleBackNavigation);
+}
+
 function initGlobalFeatures() {
     applySettings();
     initI18n();
@@ -41,6 +64,7 @@ function initGlobalFeatures() {
     initFeedbackModal();
     renderStaticIcons();
     initGlobalNavigation();
+    initBackButtons();
 }
 
 initGlobalFeatures();

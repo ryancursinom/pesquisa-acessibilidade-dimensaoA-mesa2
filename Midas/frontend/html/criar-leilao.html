@@ -14,6 +14,11 @@
 
     <main id="conteudo-principal" class="page-shell" tabindex="-1">
         <div class="container">
+            <button class="back-button" type="button" data-back-button data-back-fallback="meus-leiloes.html?aba=criados">
+                <span data-icon="chevronLeft" aria-hidden="true"></span>
+                Voltar
+            </button>
+
             <header class="page-heading">
                 <h1 id="create-auction-title">Criar Leilão</h1>
                 <p>Cadastre um item com informações claras e, se quiser, ofereça uma compra imediata além dos lances.</p>
@@ -94,24 +99,18 @@
                         <input id="auction-brand" name="brand" type="text" autocomplete="off">
                     </div>
                     <div class="form-field form-field--full">
-                        <label for="auction-image">Imagem de capa</label>
+                        <label for="auction-images">Imagens do item</label>
                         <div class="file-upload-control">
-                            <input id="auction-image" class="file-input-visually-hidden" name="image" type="file" accept="image/*" aria-describedby="auction-image-help auction-image-error">
-                            <label class="file-upload-button" for="auction-image"><span data-icon="upload" aria-hidden="true"></span>Selecionar imagem</label>
-                            <p id="auction-image-help" class="form-help">Envie uma única imagem nítida que represente o item.</p>
+                            <input id="auction-images" class="file-input-visually-hidden" name="images" type="file" accept="image/*" multiple aria-describedby="auction-images-help auction-images-error">
+                            <label class="file-upload-button" for="auction-images"><span data-icon="upload" aria-hidden="true"></span>Adicionar imagens</label>
+                            <p id="auction-images-help" class="form-help">Selecione uma ou mais imagens. Você pode remover cada prévia antes de publicar.</p>
                         </div>
-                        <div id="auction-image-preview" class="image-preview" hidden>
-                            <img id="auction-preview-image" src="../assets/img/item-default.svg" alt="Prévia da imagem de capa">
-                            <div class="image-preview__actions">
-                                <label class="btn-secondary" for="auction-image"><span data-icon="image" aria-hidden="true"></span>Trocar imagem</label>
-                                <button id="auction-remove-image" class="btn-danger" type="button"><span data-icon="trash" aria-hidden="true"></span>Remover imagem</button>
-                            </div>
-                        </div>
-                        <span id="auction-image-error" class="field-error" aria-live="polite"></span>
+                        <div id="auction-images-preview" class="image-preview-grid" aria-live="polite" hidden></div>
+                        <span id="auction-images-error" class="field-error" aria-live="polite"></span>
                     </div>
                 </div>
                 <div class="form-actions">
-                    <button class="btn-primary" type="submit">Publicar item</button>
+                    <button id="auction-submit-button" class="btn-primary" type="submit">Publicar item</button>
                     <a class="btn-secondary" href="meus-leiloes.html?aba=criados">Cancelar</a>
                 </div>
                 <p id="create-auction-status" class="form-status" role="status" aria-live="polite"></p>
@@ -119,7 +118,6 @@
         </div>
     </main>
 
-    <footer class="footer" data-site-footer></footer>
     <script type="module" src="../js/main.js"></script>
     <script type="module" src="../js/pages/criar-leilao.js"></script>
 </body>

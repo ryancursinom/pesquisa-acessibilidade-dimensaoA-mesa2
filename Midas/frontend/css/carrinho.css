@@ -18,3 +18,30 @@ html[data-theme='light'] .cart-item, html[data-theme='light'] .cart-summary { bo
 
 .cart-empty-state { border: 1px solid var(--border-dark); background: var(--surface); color: var(--text-white); }
 html[data-theme='light'] .cart-empty-state { border-color: #D7D0BE; background: #FFFFFF; color: #211B10; }
+
+.cart-continue-link {
+    display: inline-flex;
+    width: 100%;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+    margin-top: 12px;
+    border-radius: var(--radius-sm);
+    color: var(--primary-gold-hover);
+    font-weight: 800;
+    text-align: center;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+.cart-continue-link:hover {
+    color: #F2DB7D;
+}
+
+html[data-theme='light'] .cart-continue-link {
+    color: #624B00;
+}
+
+html[data-theme='light'] .cart-continue-link:hover {
+    color: #4B3A00;
+}

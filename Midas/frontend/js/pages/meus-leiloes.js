@@ -7,6 +7,7 @@ import { renderState } from '../components/statusMessage.js';
 import { getCreatedAuctions, getFavoriteAuctions, getMyBidAuctions, setFavorite } from '../services/auctionService.js';
 import { normalizeCollection } from '../services/api.js';
 import { t } from '../services/i18n.js';
+import { isAuctionClosed } from '../components/auctionStatus.js';
 
 const form = document.getElementById('my-auctions-filter-form');
 const grid = document.getElementById('my-auctions-grid');
@@ -68,17 +69,17 @@ function getCardOptions(auction) {
     if (currentTab === 'criados') {
         return {
             showEdit: true, actionLabel: t('Ver Lances'),
-            actionHref: `detalhes-leilao.html?id=${encodeURIComponent(auction.id)}`
+            actionHref: `detalhes-leilao.html?id=${encodeURIComponent(auction.id)}&owner=1`
         };
     }
-    if (auction.status === 'CLOSED' && auction.canCheckout) {
+    if (isAuctionClosed(auction.status) && auction.canCheckout) {
         return {
             actionLabel: t('Finalizar compra'),
             actionHref: `checkout.html?auctionId=${encodeURIComponent(auction.id)}`
         };
     }
     return {
-        actionLabel: t(auction.status === 'CLOSED' ? 'Ver resultado' : 'Ver leilão'),
+        actionLabel: t(isAuctionClosed(auction.status) ? 'Ver resultado' : 'Ver leilão'),
         actionHref: `detalhes-leilao.html?id=${encodeURIComponent(auction.id)}`
     };
 }

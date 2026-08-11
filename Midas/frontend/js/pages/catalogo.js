@@ -10,7 +10,7 @@ import { t } from '../services/i18n.js';
 
 const form = document.getElementById('catalog-search-form');
 const content = document.getElementById('catalog-content');
-const summary = document.getElementById('catalog-result-summary');
+const status = document.getElementById('catalog-status');
 const categorySelect = document.getElementById('catalog-category');
 const brandField = document.getElementById('catalog-brand-field');
 const brandInput = document.getElementById('catalog-brand');
@@ -38,19 +38,40 @@ function groupByCategory(items) {
     }, new Map());
 }
 
-function createCategoryBlock(category, items) {
-    const section = createElement('section', { className: 'catalog-category-block' });
+function createCategoryHeader(category, count) {
     const header = createElement('header', { className: 'catalog-category-header' });
-    const title = createElement('h2', { text: t(category) });
+    const titleGroup = createElement('div', { className: 'catalog-category-title' });
+    titleGroup.append(
+        createElement('h2', { text: t(category) }),
+        createElement('span', {
+            className: 'catalog-category-count',
+            text: t('Itens encontrados: {count}', { count })
+        })
+    );
+    header.appendChild(titleGroup);
+    return header;
+}
+
+function createCategoryAction(category) {
+    const wrapper = createElement('div', { className: 'catalog-category-action' });
     const link = createElement('a', {
-        className: 'catalog-category-link',
+        className: 'btn-secondary catalog-category-link',
         text: t('Acessar categoria de {category}', { category: t(category) }),
         attrs: { href: `categoria.html?categoria=${encodeURIComponent(category)}` }
     });
+    wrapper.appendChild(link);
+    return wrapper;
+}
+
+function createCategoryBlock(category, items) {
+    const section = createElement('section', { className: 'catalog-category-block' });
     const grid = createElement('div', { className: 'auctions-grid' });
     items.forEach((auction) => grid.appendChild(createAuctionCard(auction, { showFavorite: true })));
-    appendChildren(header, [title, link]);
-    appendChildren(section, [header, grid]);
+    appendChildren(section, [
+        createCategoryHeader(category, items.length),
+        grid,
+        createCategoryAction(category)
+    ]);
     return section;
 }
 
@@ -64,25 +85,35 @@ function renderCatalog() {
     const filters = getFilters();
     const filtered = sortAuctions(filterAuctions(auctions, filters), filters.sort);
     clearElement(content);
-    summary.textContent = t('Itens encontrados: {count}', { count: filtered.length });
+    status.textContent = '';
+
     if (!filtered.length) {
         renderState(content, 'empty', t('Nenhum item corresponde aos filtros selecionados. Tente limpar alguns filtros.'));
         return;
     }
-    groupByCategory(filtered).forEach((items, category) => content.appendChild(createCategoryBlock(category, items)));
+
+    groupByCategory(filtered).forEach((items, category) => {
+        content.appendChild(createCategoryBlock(category, items));
+    });
 }
 
 async function toggleFavorite(button) {
     const auction = auctions.find((item) => String(item.id) === String(button.dataset.auctionId));
     if (!auction) return;
+
     button.disabled = true;
     try {
         await setFavorite(auction.id, !auction.isFavorite);
         auction.isFavorite = !auction.isFavorite;
         renderCatalog();
-        summary.textContent = t(auction.isFavorite ? 'Leilão adicionado aos favoritos.' : 'Leilão removido dos favoritos.');
+        status.textContent = t(auction.isFavorite
+            ? 'Leilão adicionado aos favoritos.'
+            : 'Leilão removido dos favoritos.');
     } catch (error) {
-        summary.textContent = getUserErrorMessage(error, t('Não conseguimos atualizar seus favoritos agora. Tente novamente em instantes.'));
+        status.textContent = getUserErrorMessage(
+            error,
+            t('Não conseguimos atualizar seus favoritos agora. Tente novamente em instantes.')
+        );
     } finally {
         button.disabled = false;
     }
@@ -94,8 +125,11 @@ async function loadCatalog() {
         auctions = normalizeCollection(await getAuctions());
         renderCatalog();
     } catch (error) {
-        renderState(content, 'error', getUserErrorMessage(error, t('Não conseguimos carregar o catálogo agora. Tente novamente em instantes.')));
-        summary.textContent = '';
+        renderState(content, 'error', getUserErrorMessage(
+            error,
+            t('Não conseguimos carregar o catálogo agora. Tente novamente em instantes.')
+        ));
+        status.textContent = '';
     }
 }
 
@@ -112,5 +146,6 @@ content.addEventListener('click', (event) => {
     const favoriteButton = event.target.closest('[data-action="favorite"]');
     if (favoriteButton) toggleFavorite(favoriteButton);
 });
+
 updateBrandVisibility();
 loadCatalog();

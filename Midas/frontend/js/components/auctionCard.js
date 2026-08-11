@@ -1,9 +1,10 @@
 import { appendChildren, createElement, formatCurrency } from './dom.js';
 import { createIcon } from './icons.js';
 import { t } from '../services/i18n.js';
+import { getAuctionStatusClass, getAuctionStatusLabel, isAuctionClosed } from './auctionStatus.js';
 
 function formatTimeRemaining(auction) {
-    if (auction.status === 'CLOSED') return t('Encerrado');
+    if (isAuctionClosed(auction.status)) return t('Encerrado');
     if (auction.timeRemaining) return auction.timeRemaining;
     if (!auction.endsAt) return t('Em andamento');
     const remainingMs = new Date(auction.endsAt).getTime() - Date.now();
@@ -17,11 +18,12 @@ function formatTimeRemaining(auction) {
 function createFavoriteButton(auction) {
     const favorite = Boolean(auction.isFavorite);
     const button = createElement('button', {
-        className: 'card-wishlist',
+        className: favorite ? 'card-wishlist card-wishlist--active' : 'card-wishlist',
         attrs: {
             type: 'button',
-            'aria-label': t(favorite ? 'Remover leilão dos favoritos' : 'Favoritar leilão'),
-            'aria-pressed': String(favorite)
+            'aria-label': t(favorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'),
+            'aria-pressed': String(favorite),
+            title: t(favorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos')
         },
         dataset: { action: 'favorite', auctionId: auction.id }
     });
@@ -52,8 +54,8 @@ function createMedia(auction, rootPath, options) {
         }
     });
     const status = createElement('span', {
-        className: `card-badge card-badge--${String(auction.status || 'active').toLowerCase()}`,
-        text: t(auction.status === 'CLOSED' ? 'ENCERRADO' : 'AO VIVO')
+        className: `card-badge card-badge--${getAuctionStatusClass(auction.status)}`,
+        text: t(getAuctionStatusLabel(auction.status))
     });
     const timer = createElement('span', { className: 'card-timer', text: formatTimeRemaining(auction) });
     appendChildren(media, [image, status, timer]);
@@ -63,7 +65,7 @@ function createMedia(auction, rootPath, options) {
 }
 
 function createCardAction(auction, rootPath, options) {
-    const label = options.actionLabel || (auction.status === 'CLOSED' ? t('Ver Detalhes') : t('Ver leilão'));
+    const label = options.actionLabel || (isAuctionClosed(auction.status) ? t('Ver Detalhes') : t('Ver leilão'));
     const href = options.actionHref || `${rootPath}/html/detalhes-leilao.html?id=${encodeURIComponent(auction.id)}`;
     return createElement('a', { className: 'btn-bid', text: label, attrs: { href } });
 }
@@ -71,7 +73,7 @@ function createCardAction(auction, rootPath, options) {
 function createPriceInfo(auction) {
     const wrapper = createElement('div');
     const label = createElement('span', {
-        className: 'bid-label', text: t(auction.status === 'CLOSED' ? 'Lance Final' : 'Lance Atual')
+        className: 'bid-label', text: t(isAuctionClosed(auction.status) ? 'Lance Final' : 'Lance Atual')
     });
     const price = createElement('strong', {
         className: 'bid-value', text: formatCurrency(auction.currentBid ?? auction.startingBid ?? 0)
@@ -81,7 +83,7 @@ function createPriceInfo(auction) {
 }
 
 function createBuyNowHint(auction) {
-    if (!auction.buyNowPrice || auction.status === 'CLOSED') return null;
+    if (!auction.buyNowPrice || isAuctionClosed(auction.status)) return null;
     return createElement('p', {
         className: 'card-buy-now-hint',
         text: t('Compra imediata disponível por {price}', { price: formatCurrency(auction.buyNowPrice) })
