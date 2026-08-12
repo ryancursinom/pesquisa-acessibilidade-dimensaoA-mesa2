@@ -112,7 +112,8 @@
 }
 
 .bid-section,
-.bid-history-section {
+.bid-history-section,
+.winner-section {
     margin-top: 54px;
 }
 
@@ -198,8 +199,38 @@
     font-size: 1rem;
 }
 
+.winner-contact-list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.winner-contact-list div,
+.winner-empty-message {
+    padding: 16px;
+    border: 1px solid var(--border-dark);
+    border-radius: 8px;
+    background: var(--surface);
+}
+
+.winner-contact-list dt {
+    color: var(--text-muted-dark);
+    font-size: 0.82rem;
+}
+
+.winner-contact-list dd {
+    margin-top: 4px;
+    overflow-wrap: anywhere;
+    font-weight: 800;
+}
+
+.winner-contact-list a {
+    color: var(--primary-gold-hover);
+}
+
 html[data-theme='light'] .details-kicker,
-html[data-theme='light'] .bid-history-value {
+html[data-theme='light'] .bid-history-value,
+html[data-theme='light'] .winner-contact-list a {
     color: var(--gold-ink);
 }
 
@@ -224,7 +255,9 @@ html[data-contrast='high'] .details-main-image img,
 html[data-contrast='high'] .details-panel,
 html[data-contrast='high'] .details-meta div,
 html[data-contrast='high'] .details-price,
-html[data-contrast='high'] .bid-history-item {
+html[data-contrast='high'] .bid-history-item,
+html[data-contrast='high'] .winner-contact-list div,
+html[data-contrast='high'] .winner-empty-message {
     border-color: #FFFFFF;
     background: #000000;
     color: #FFFFFF;
@@ -235,13 +268,15 @@ html[data-contrast='high'] .details-meta dt,
 html[data-contrast='high'] .details-price span,
 html[data-contrast='high'] .details-buy-now-info,
 html[data-contrast='high'] .section-helper,
-html[data-contrast='high'] .bid-history-item time {
+html[data-contrast='high'] .bid-history-item time,
+html[data-contrast='high'] .winner-contact-list dt {
     color: #FFFFFF;
 }
 
 html[data-contrast='high'] .details-kicker,
 html[data-contrast='high'] .details-price strong,
-html[data-contrast='high'] .bid-history-value {
+html[data-contrast='high'] .bid-history-value,
+html[data-contrast='high'] .winner-contact-list a {
     color: #FFD84D;
 }
 
@@ -253,7 +288,8 @@ html[data-contrast='high'] .bid-history-value {
 
 @media (max-width: 760px) {
     .auction-action-layout,
-    .bid-form {
+    .bid-form,
+    .winner-contact-list {
         grid-template-columns: 1fr;
     }
 

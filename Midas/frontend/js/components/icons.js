@@ -74,7 +74,7 @@ const ICONS = {
         ['circle', { cx: 12, cy: 12, r: 3 }],
         ['path', { d: 'M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21h-4v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H3v-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3A1.7 1.7 0 0 0 10 3V3h4v.1a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.1v4H21a1.7 1.7 0 0 0-1.6 1Z' }]
     ],
-    logout: [
+    encerrarSessao: [
         ['path', { d: 'M10 17l5-5-5-5' }],
         ['path', { d: 'M15 12H3' }],
         ['path', { d: 'M14 3h5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-5' }]
@@ -151,14 +151,14 @@ const ICONS = {
     ]
 };
 
-function setAttributes(element, attributes) {
+function definirAtributos(element, attributes) {
     Object.entries(attributes).forEach(([name, value]) => element.setAttribute(name, String(value)));
 }
 
-export function createIcon(name, options = {}) {
+export function criarIcone(name, options = {}) {
     const icon = document.createElementNS(SVG_NS, 'svg');
     const { size = 22, className = '', filled = false, label = '' } = options;
-    setAttributes(icon, {
+    definirAtributos(icon, {
         viewBox: '0 0 24 24', width: size, height: size,
         fill: filled ? 'currentColor' : 'none', stroke: 'currentColor',
         'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round',
@@ -173,16 +173,16 @@ export function createIcon(name, options = {}) {
     }
     (ICONS[name] || ICONS.check).forEach(([tag, attrs]) => {
         const child = document.createElementNS(SVG_NS, tag);
-        setAttributes(child, attrs);
+        definirAtributos(child, attrs);
         icon.appendChild(child);
     });
     return icon;
 }
 
-export function renderStaticIcons(root = document) {
+export function renderizarIconesEstaticos(root = document) {
     root.querySelectorAll('[data-icon]').forEach((slot) => {
         if (slot.querySelector('svg')) return;
-        slot.appendChild(createIcon(slot.dataset.icon, {
+        slot.appendChild(criarIcone(slot.dataset.icon, {
             size: Number(slot.dataset.iconSize || 22),
             filled: slot.dataset.iconFilled === 'true'
         }));

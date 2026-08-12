@@ -10,13 +10,13 @@ export const AUCTION_CATEGORIES = [
 
 export const BRAND_CATEGORIES = new Set(['Automóveis', 'Aparelhos Eletrônicos']);
 
-export function categorySupportsBrand(category) {
+export function verificarCategoriaAceitaMarca(category) {
     return BRAND_CATEGORIES.has(category);
 }
 
 
-export function syncBrandField(category, field, input) {
-    const visible = categorySupportsBrand(category);
+export function sincronizarCampoMarca(category, field, input) {
+    const visible = verificarCategoriaAceitaMarca(category);
     field.hidden = !visible;
     if (!visible && input) input.value = '';
     return visible;

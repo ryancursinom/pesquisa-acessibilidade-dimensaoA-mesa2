@@ -1,12 +1,12 @@
-import { createAuctionCard } from '../components/auctionCard.js';
-import { debounce, filterAuctions, sortAuctions } from '../components/auctionFilters.js';
-import { syncBrandField } from '../components/catalogConfig.js';
-import { clearElement } from '../components/dom.js';
-import { getUserErrorMessage } from '../components/userError.js';
-import { renderState } from '../components/statusMessage.js';
-import { getAuctions, setFavorite } from '../services/auctionService.js';
-import { normalizeCollection } from '../services/api.js';
-import { t } from '../services/i18n.js';
+import { criarCardLeilao } from '../components/auctionCard.js';
+import { adiarExecucao, filtrarLeiloes, ordenarLeiloes } from '../components/auctionFilters.js';
+import { sincronizarCampoMarca } from '../components/catalogConfig.js';
+import { limparElemento } from '../components/dom.js';
+import { obterMensagemErroUsuario } from '../components/userError.js';
+import { renderizarEstado } from '../components/statusMessage.js';
+import { obterLeiloes, definirFavorito } from '../services/auctionService.js';
+import { normalizarColecao } from '../services/api.js';
+import { traduzir } from '../services/i18n.js';
 
 const form = document.getElementById('category-filter-form');
 const grid = document.getElementById('category-grid');
@@ -18,7 +18,7 @@ const brandInput = document.getElementById('filter-brand');
 const category = new URLSearchParams(window.location.search).get('categoria') || 'Todos';
 let auctions = [];
 
-function getFilters() {
+function obterFiltros() {
     const data = new FormData(form);
     return {
         search: data.get('search'),
@@ -31,54 +31,54 @@ function getFilters() {
     };
 }
 
-function renderResults() {
-    const filters = getFilters();
-    const filtered = sortAuctions(filterAuctions(auctions, filters), filters.sort);
-    clearElement(grid);
-    summary.textContent = t('Itens encontrados: {count}', { count: filtered.length });
+function renderizarResultados() {
+    const filters = obterFiltros();
+    const filtered = ordenarLeiloes(filtrarLeiloes(auctions, filters), filters.sort);
+    limparElemento(grid);
+    summary.textContent = traduzir('Itens encontrados: {count}', { count: filtered.length });
     if (!filtered.length) {
-        renderState(grid, 'empty', t('Nenhum item corresponde aos filtros selecionados. Tente limpar alguns filtros.'));
+        renderizarEstado(grid, 'empty', traduzir('Nenhum item corresponde aos filtros selecionados. Tente limpar alguns filtros.'));
         return;
     }
-    filtered.forEach((auction) => grid.appendChild(createAuctionCard(auction, { showFavorite: true })));
+    filtered.forEach((auction) => grid.appendChild(criarCardLeilao(auction, { showFavorite: true })));
 }
 
-async function toggleFavorite(button) {
+async function alternarFavorito(button) {
     const auction = auctions.find((item) => String(item.id) === String(button.dataset.auctionId));
     if (!auction) return;
     button.disabled = true;
     try {
-        await setFavorite(auction.id, !auction.isFavorite);
+        await definirFavorito(auction.id, !auction.isFavorite);
         auction.isFavorite = !auction.isFavorite;
-        renderResults();
+        renderizarResultados();
     } catch (error) {
-        summary.textContent = getUserErrorMessage(error, t('Não conseguimos atualizar seus favoritos agora. Tente novamente em instantes.'));
+        summary.textContent = obterMensagemErroUsuario(error, traduzir('Não conseguimos atualizar seus favoritos agora. Tente novamente em instantes.'));
     } finally {
         button.disabled = false;
     }
 }
 
-async function loadCategory() {
-    const translatedCategory = category === 'Todos' ? t('Todas as categorias') : t(category);
-    title.textContent = category === 'Todos' ? t('Catálogo de Leilões') : t('Catálogo de {category}', { category: translatedCategory });
+async function carregarCategoria() {
+    const translatedCategory = category === 'Todos' ? traduzir('Todas as categorias') : traduzir(category);
+    title.textContent = category === 'Todos' ? traduzir('Catálogo de Leilões') : traduzir('Catálogo de {category}', { category: translatedCategory });
     description.textContent = category === 'Todos'
-        ? t('Explore os itens disponíveis em todas as categorias.')
-        : t('Explore os itens disponíveis em {category}.', { category: translatedCategory });
-    syncBrandField(category, brandField, brandInput);
-    renderState(grid, 'loading', t('Carregando itens...'));
+        ? traduzir('Explore os itens disponíveis em todas as categorias.')
+        : traduzir('Explore os itens disponíveis em {category}.', { category: translatedCategory });
+    sincronizarCampoMarca(category, brandField, brandInput);
+    renderizarEstado(grid, 'loading', traduzir('Carregando itens...'));
     try {
-        auctions = normalizeCollection(await getAuctions());
-        renderResults();
+        auctions = normalizarColecao(await obterLeiloes());
+        renderizarResultados();
     } catch (error) {
-        renderState(grid, 'error', getUserErrorMessage(error, t('Não conseguimos carregar os itens desta categoria agora. Tente novamente em instantes.')));
+        renderizarEstado(grid, 'error', obterMensagemErroUsuario(error, traduzir('Não conseguimos carregar os itens desta categoria agora. Tente novamente em instantes.')));
     }
 }
 
-form.addEventListener('input', debounce(renderResults));
-form.addEventListener('change', renderResults);
-form.addEventListener('reset', () => window.setTimeout(renderResults));
+form.addEventListener('input', adiarExecucao(renderizarResultados));
+form.addEventListener('change', renderizarResultados);
+form.addEventListener('reset', () => window.setTimeout(renderizarResultados));
 grid.addEventListener('click', (event) => {
     const favoriteButton = event.target.closest('[data-action="favorite"]');
-    if (favoriteButton) toggleFavorite(favoriteButton);
+    if (favoriteButton) alternarFavorito(favoriteButton);
 });
-loadCategory();
+carregarCategoria();

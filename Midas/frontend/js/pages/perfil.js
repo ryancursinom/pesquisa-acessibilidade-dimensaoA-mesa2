@@ -1,10 +1,12 @@
-import { clearFieldError, focusFirstInvalid, validateEmail, validatePassword, validateRequired } from '../components/formValidation.js';
-import { closeDialog, initDialog, openDialog } from '../components/modal.js';
-import { renderState, setLiveMessage } from '../components/statusMessage.js';
-import { getUserErrorMessage } from '../components/userError.js';
-import { logout } from '../services/authService.js';
-import { t } from '../services/i18n.js';
-import { getProfile, updatePassword, updateProfile, updateProfilePhoto } from '../services/userService.js';
+import { limparErroCampo, focarPrimeiroCampoInvalido, validarCampoTelefoneBrasileiro, validarEmail, validarSenha, validarCampoObrigatorio } from '../components/formValidation.js';
+import { fecharDialogo, inicializarDialogo, abrirDialogo } from '../components/modal.js';
+import { aplicarMascaraTelefone, formatarTelefoneBrasileiro, obterDigitosTelefone } from '../components/phone.js';
+import { exigirAutenticacao } from '../components/privatePageGuard.js';
+import { renderizarEstado, definirMensagemAoVivo } from '../components/statusMessage.js';
+import { obterMensagemErroUsuario } from '../components/userError.js';
+import { encerrarSessao } from '../services/authService.js';
+import { traduzir } from '../services/i18n.js';
+import { obterPerfil, atualizarSenha, atualizarPerfil, atualizarFotoPerfil } from '../services/userService.js';
 
 const state = document.getElementById('profile-state');
 const dataContainer = document.getElementById('profile-data');
@@ -23,12 +25,14 @@ const avatarInitials = document.getElementById('profile-avatar-initials');
 const avatarImage = document.getElementById('profile-avatar-image');
 const previewInitials = document.getElementById('profile-photo-preview-initials');
 const previewImage = document.getElementById('profile-photo-preview-image');
+const phoneField = document.getElementById('profile-phone');
+const canInitializePage = exigirAutenticacao();
 
 let currentProfile = {};
 let selectedPhoto = null;
 let previewUrl = '';
 
-function getInitials(name) {
+function obterIniciais(name) {
     return String(name || 'M')
         .split(/\s+/)
         .filter(Boolean)
@@ -38,16 +42,16 @@ function getInitials(name) {
         .toUpperCase();
 }
 
-function revokePreviewUrl() {
+function revogarUrlPrevia() {
     if (previewUrl) URL.revokeObjectURL(previewUrl);
     previewUrl = '';
 }
 
-function showAvatar(initialsElement, imageElement, url, name) {
+function exibirAvatar(initialsElement, imageElement, url, name) {
     const hasImage = Boolean(url);
     initialsElement.hidden = hasImage;
     imageElement.hidden = !hasImage;
-    initialsElement.textContent = getInitials(name);
+    initialsElement.textContent = obterIniciais(name);
 
     if (!hasImage) {
         imageElement.removeAttribute('src');
@@ -56,157 +60,164 @@ function showAvatar(initialsElement, imageElement, url, name) {
     }
 
     imageElement.src = url;
-    imageElement.alt = t('Foto de perfil de {name}', { name: name || t('Usuário Midas') });
+    imageElement.alt = traduzir('Foto de perfil de {name}', { name: name || traduzir('Usuário Midas') });
 }
 
-function renderProfile(profile) {
+function renderizarPerfil(profile) {
     currentProfile = profile;
-    const name = profile.name || t('Usuário Midas');
+    const name = profile.name || traduzir('Usuário Midas');
     document.getElementById('profile-name-heading').textContent = name;
     document.getElementById('profile-location').textContent =
-        [profile.city, profile.country].filter(Boolean).join(', ') || t('Localização não informada');
+        [profile.city, profile.country].filter(Boolean).join(', ') || traduzir('Localização não informada');
 
-    showAvatar(avatarInitials, avatarImage, profile.imageUrl, name);
+    exibirAvatar(avatarInitials, avatarImage, profile.imageUrl, name);
     document.getElementById('profile-name').value = profile.name || '';
     document.getElementById('profile-email').value = profile.email || '';
+    phoneField.value = formatarTelefoneBrasileiro(profile.phone);
     document.getElementById('profile-city').value = profile.city || '';
     document.getElementById('profile-country').value = profile.country || '';
     dataContainer.hidden = false;
     state.textContent = '';
 }
 
-function resetPhotoDialog() {
+function redefinirDialogoFoto() {
     selectedPhoto = null;
     photoInput.value = '';
     photoSaveButton.disabled = true;
-    revokePreviewUrl();
-    setLiveMessage(photoStatus, '');
-    showAvatar(previewInitials, previewImage, currentProfile.imageUrl, currentProfile.name);
+    revogarUrlPrevia();
+    definirMensagemAoVivo(photoStatus, '');
+    exibirAvatar(previewInitials, previewImage, currentProfile.imageUrl, currentProfile.name);
 }
 
-function openPhotoDialog() {
-    resetPhotoDialog();
-    openDialog(photoDialog, photoEditButton);
+function abrirDialogoFoto() {
+    redefinirDialogoFoto();
+    abrirDialogo(photoDialog, photoEditButton);
 }
 
-function handlePhotoSelection() {
+function selecionarFotoPerfil() {
     const [file] = photoInput.files;
     if (!file) return;
     if (!file.type.startsWith('image/')) {
-        setLiveMessage(photoStatus, t('Escolha um arquivo de imagem válido.'), true);
+        definirMensagemAoVivo(photoStatus, traduzir('Escolha um arquivo de imagem válido.'), true);
         return;
     }
 
     selectedPhoto = file;
-    revokePreviewUrl();
+    revogarUrlPrevia();
     previewUrl = URL.createObjectURL(file);
-    showAvatar(previewInitials, previewImage, previewUrl, currentProfile.name);
+    exibirAvatar(previewInitials, previewImage, previewUrl, currentProfile.name);
     photoSaveButton.disabled = false;
-    setLiveMessage(photoStatus, t('Prévia pronta. Salve a foto para confirmar a alteração.'));
+    definirMensagemAoVivo(photoStatus, traduzir('Prévia pronta. Salve a foto para confirmar a alteração.'));
 }
 
-async function savePhoto() {
+async function salvarFotoPerfil() {
     if (!selectedPhoto) return;
     photoSaveButton.disabled = true;
-    setLiveMessage(photoStatus, t('Salvando foto...'));
+    definirMensagemAoVivo(photoStatus, traduzir('Salvando foto...'));
 
     try {
-        await updateProfilePhoto(selectedPhoto);
-        renderProfile(await getProfile());
-        setLiveMessage(photoAnnouncement, t('Foto de perfil atualizada com sucesso.'));
-        closeDialog(photoDialog);
+        await atualizarFotoPerfil(selectedPhoto);
+        renderizarPerfil(await obterPerfil());
+        definirMensagemAoVivo(photoAnnouncement, traduzir('Foto de perfil atualizada com sucesso.'));
+        fecharDialogo(photoDialog);
     } catch (error) {
-        setLiveMessage(photoStatus, getUserErrorMessage(
+        definirMensagemAoVivo(photoStatus, obterMensagemErroUsuario(
             error,
-            t('Não conseguimos atualizar sua foto agora. Tente novamente em instantes.')
+            traduzir('Não conseguimos atualizar sua foto agora. Tente novamente em instantes.')
         ), true);
         photoSaveButton.disabled = false;
     }
 }
 
-function validateProfileForm() {
+function validarFormularioPerfil() {
     const name = document.getElementById('profile-name');
     const email = document.getElementById('profile-email');
-    const valid = validateRequired(name, t('Nome'))
-        && validateRequired(email, t('E-mail'))
-        && validateEmail(email);
+    const valid = validarCampoObrigatorio(name, traduzir('Nome'))
+        && validarCampoObrigatorio(email, traduzir('E-mail'))
+        && validarEmail(email)
+        && validarCampoTelefoneBrasileiro(phoneField);
 
-    if (!valid) focusFirstInvalid(profileForm);
+    if (!valid) focarPrimeiroCampoInvalido(profileForm);
     return valid;
 }
 
-async function saveProfile(event) {
+async function salvarPerfil(event) {
     event.preventDefault();
-    if (!validateProfileForm()) return;
+    if (!validarFormularioPerfil()) return;
 
     const submitButton = profileForm.querySelector('[type="submit"]');
     submitButton.disabled = true;
-    setLiveMessage(profileStatus, t('Salvando alterações...'));
+    definirMensagemAoVivo(profileStatus, traduzir('Salvando alterações...'));
 
     try {
-        renderProfile(await updateProfile(Object.fromEntries(new FormData(profileForm))));
-        setLiveMessage(profileStatus, t('Perfil atualizado com sucesso.'));
+        const profileData = Object.fromEntries(new FormData(profileForm));
+        profileData.phone = obterDigitosTelefone(profileData.phone);
+        renderizarPerfil(await atualizarPerfil(profileData));
+        definirMensagemAoVivo(profileStatus, traduzir('Perfil atualizado com sucesso.'));
     } catch (error) {
-        setLiveMessage(profileStatus, getUserErrorMessage(error), true);
+        definirMensagemAoVivo(profileStatus, obterMensagemErroUsuario(error), true);
     } finally {
         submitButton.disabled = false;
     }
 }
 
-function validatePasswordForm() {
+function validarFormularioSenha() {
     const current = document.getElementById('current-password');
     const next = document.getElementById('new-password');
-    const valid = validateRequired(current, t('Senha atual')) && validatePassword(next);
-    if (!valid) focusFirstInvalid(passwordForm);
+    const valid = validarCampoObrigatorio(current, traduzir('Senha atual')) && validarSenha(next);
+    if (!valid) focarPrimeiroCampoInvalido(passwordForm);
     return valid;
 }
 
-async function savePassword(event) {
+async function salvarSenha(event) {
     event.preventDefault();
-    if (!validatePasswordForm()) return;
+    if (!validarFormularioSenha()) return;
 
     const submitButton = passwordForm.querySelector('[type="submit"]');
     submitButton.disabled = true;
-    setLiveMessage(passwordStatus, t('Atualizando senha...'));
+    definirMensagemAoVivo(passwordStatus, traduzir('Atualizando senha...'));
 
     try {
-        await updatePassword(Object.fromEntries(new FormData(passwordForm)));
+        await atualizarSenha(Object.fromEntries(new FormData(passwordForm)));
         passwordForm.reset();
-        setLiveMessage(passwordStatus, t('Senha atualizada com sucesso.'));
+        definirMensagemAoVivo(passwordStatus, traduzir('Senha atualizada com sucesso.'));
     } catch (error) {
-        setLiveMessage(passwordStatus, getUserErrorMessage(error), true);
+        definirMensagemAoVivo(passwordStatus, obterMensagemErroUsuario(error), true);
     } finally {
         submitButton.disabled = false;
     }
 }
 
-async function loadProfile() {
-    renderState(state, 'loading', t('Carregando perfil...'));
+async function carregarPerfil() {
+    renderizarEstado(state, 'loading', traduzir('Carregando perfil...'));
     try {
-        renderProfile(await getProfile());
+        renderizarPerfil(await obterPerfil());
     } catch (error) {
-        renderState(state, 'error', `${getUserErrorMessage(error)} ${t('Entre novamente para acessar sua conta.')}`);
+        renderizarEstado(state, 'error', `${obterMensagemErroUsuario(error)} ${traduzir('Entre novamente para acessar sua conta.')}`);
     }
 }
 
-initDialog(photoDialog);
-profileForm.addEventListener('submit', saveProfile);
-passwordForm.addEventListener('submit', savePassword);
-photoEditButton.addEventListener('click', openPhotoDialog);
-photoChooseButton.addEventListener('click', () => photoInput.click());
-photoInput.addEventListener('change', handlePhotoSelection);
-photoSaveButton.addEventListener('click', savePhoto);
-photoDialog.addEventListener('close', resetPhotoDialog);
-profileForm.querySelectorAll('input').forEach((field) => {
-    field.addEventListener('input', () => clearFieldError(field));
-});
-passwordForm.querySelectorAll('input').forEach((field) => {
-    field.addEventListener('input', () => clearFieldError(field));
-});
-document.getElementById('logout-button').addEventListener('click', () => {
-    logout();
-    window.location.href = 'login.html';
-});
-window.addEventListener('pagehide', revokePreviewUrl);
+if (canInitializePage) {
+    inicializarDialogo(photoDialog);
+    profileForm.addEventListener('submit', salvarPerfil);
+    passwordForm.addEventListener('submit', salvarSenha);
+    photoEditButton.addEventListener('click', abrirDialogoFoto);
+    photoChooseButton.addEventListener('click', () => photoInput.click());
+    photoInput.addEventListener('change', selecionarFotoPerfil);
+    photoSaveButton.addEventListener('click', salvarFotoPerfil);
+    photoDialog.addEventListener('close', redefinirDialogoFoto);
+    profileForm.querySelectorAll('input').forEach((field) => {
+        field.addEventListener('input', () => limparErroCampo(field));
+    });
+    phoneField.addEventListener('input', () => aplicarMascaraTelefone(phoneField));
+    passwordForm.querySelectorAll('input').forEach((field) => {
+        field.addEventListener('input', () => limparErroCampo(field));
+    });
+    document.getElementById('logout-button').addEventListener('click', () => {
+        encerrarSessao();
+        window.location.href = 'login.html';
+    });
+    window.addEventListener('pagehide', revogarUrlPrevia);
 
-loadProfile();
+    carregarPerfil();
+}

@@ -5,6 +5,6 @@ export const OFFICIAL_STORE_PRODUCTS = [
     { id: 'midas-welcome-kit', title: 'Kit de Boas-vindas Midas', description: 'Kit exclusivo com itens oficiais da marca Midas.', price: 119.90, icon: 'package' }
 ];
 
-export function getOfficialStoreProducts() {
+export function obterProdutosLojaOficial() {
     return OFFICIAL_STORE_PRODUCTS.map((product) => ({ ...product }));
 }

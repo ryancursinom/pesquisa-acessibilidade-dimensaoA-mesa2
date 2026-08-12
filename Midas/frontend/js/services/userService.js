@@ -1,29 +1,29 @@
-import { apiRequest } from './api.js';
+import { enviarRequisicaoApi } from './api.js';
 
-export function getProfile() {
-    return apiRequest('/users/me');
+export function obterPerfil() {
+    return enviarRequisicaoApi('/users/me');
 }
 
-export function updateProfile(data) {
-    return apiRequest('/users/me', {
+export function atualizarPerfil(data) {
+    return enviarRequisicaoApi('/users/me', {
         method: 'PUT',
         body: JSON.stringify(data)
     });
 }
 
-export function updatePassword(data) {
-    return apiRequest('/users/me/password', {
+export function atualizarSenha(data) {
+    return enviarRequisicaoApi('/users/me/password', {
         method: 'PUT',
         body: JSON.stringify(data)
     });
 }
 
 
-export function updateProfilePhoto(file) {
+export function atualizarFotoPerfil(file) {
     const formData = new FormData();
     formData.append('image', file);
 
-    return apiRequest('/users/me/photo', {
+    return enviarRequisicaoApi('/users/me/photo', {
         method: 'PUT',
         body: formData
     });

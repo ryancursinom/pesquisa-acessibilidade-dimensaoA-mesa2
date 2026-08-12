@@ -1,7 +1,7 @@
-import { setLiveMessage } from '../components/statusMessage.js';
-import { logout } from '../services/authService.js';
-import { t } from '../services/i18n.js';
-import { getSettings, resetSettings, saveSettings } from '../services/settingsService.js';
+import { definirMensagemAoVivo } from '../components/statusMessage.js';
+import { encerrarSessao, verificarAutenticacao } from '../services/authService.js';
+import { traduzir } from '../services/i18n.js';
+import { obterConfiguracoes, restaurarConfiguracoes, salvarConfiguracoes } from '../services/settingsService.js';
 
 const form = document.getElementById('settings-form');
 const status = document.getElementById('settings-status');
@@ -11,12 +11,13 @@ const backButton = document.getElementById('settings-back-button');
 const siteHeader = document.getElementById('settings-site-header');
 const siteFooter = document.getElementById('settings-site-footer');
 
-function isProfileContext() {
-    return new URLSearchParams(window.location.search).get('origem') === 'perfil';
+function verificarContextoPerfil() {
+    return new URLSearchParams(window.location.search).get('origem') === 'perfil'
+        && verificarAutenticacao();
 }
 
-function configurePageContext() {
-    const profileContext = isProfileContext();
+function configurarContextoPagina() {
+    const profileContext = verificarContextoPerfil();
     sidebar.hidden = !profileContext;
     backButton.hidden = profileContext;
     siteHeader.hidden = !profileContext;
@@ -24,7 +25,7 @@ function configurePageContext() {
     layout.classList.toggle('settings-layout--profile', profileContext);
 }
 
-function populateForm(settings) {
+function preencherFormulario(settings) {
     form.elements.theme.value = settings.theme;
     form.elements.contrast.value = settings.contrast;
     form.elements.fontSize.value = settings.fontSize;
@@ -33,7 +34,7 @@ function populateForm(settings) {
     form.elements.reduceMotion.checked = settings.reduceMotion;
 }
 
-function readForm() {
+function lerFormulario() {
     return {
         theme: form.elements.theme.value,
         contrast: form.elements.contrast.value,
@@ -44,7 +45,7 @@ function readForm() {
     };
 }
 
-function reloadForLanguageChange(previousLanguage, nextLanguage) {
+function recarregarAposAlteracaoIdioma(previousLanguage, nextLanguage) {
     if (previousLanguage === nextLanguage) return false;
     window.location.reload();
     return true;
@@ -52,28 +53,28 @@ function reloadForLanguageChange(previousLanguage, nextLanguage) {
 
 form.addEventListener('submit', (event) => {
     event.preventDefault();
-    const previousLanguage = getSettings().language;
-    const settings = saveSettings(readForm());
+    const previousLanguage = obterConfiguracoes().language;
+    const settings = salvarConfiguracoes(lerFormulario());
 
-    if (!reloadForLanguageChange(previousLanguage, settings.language)) {
-        setLiveMessage(status, t('Configurações salvas.'));
+    if (!recarregarAposAlteracaoIdioma(previousLanguage, settings.language)) {
+        definirMensagemAoVivo(status, traduzir('Configurações salvas.'));
     }
 });
 
 document.getElementById('reset-settings').addEventListener('click', () => {
-    const previousLanguage = getSettings().language;
-    const settings = resetSettings();
-    populateForm(settings);
+    const previousLanguage = obterConfiguracoes().language;
+    const settings = restaurarConfiguracoes();
+    preencherFormulario(settings);
 
-    if (!reloadForLanguageChange(previousLanguage, settings.language)) {
-        setLiveMessage(status, t('Configurações restauradas para o padrão.'));
+    if (!recarregarAposAlteracaoIdioma(previousLanguage, settings.language)) {
+        definirMensagemAoVivo(status, traduzir('Configurações restauradas para o padrão.'));
     }
 });
 
 document.getElementById('settings-logout-button').addEventListener('click', () => {
-    logout();
+    encerrarSessao();
     window.location.href = 'login.html';
 });
 
-configurePageContext();
-populateForm(getSettings());
+configurarContextoPagina();
+preencherFormulario(obterConfiguracoes());

@@ -1,7 +1,8 @@
-import { formatCurrency } from './dom.js';
-import { t } from '../services/i18n.js';
+import { formatarMoeda } from './dom.js';
+import { validarTelefoneBrasileiro } from './phone.js';
+import { traduzir } from '../services/i18n.js';
 
-export function setFieldError(field, message) {
+export function definirErroCampo(field, message) {
     const errorId = field.getAttribute('aria-describedby');
     const ids = String(errorId || '').split(/\s+/).filter(Boolean);
     const errorElement = ids.map((id) => document.getElementById(id)).find((element) => element?.classList.contains('field-error'));
@@ -9,7 +10,7 @@ export function setFieldError(field, message) {
     if (errorElement) errorElement.textContent = message;
 }
 
-export function clearFieldError(field) {
+export function limparErroCampo(field) {
     const errorId = field.getAttribute('aria-describedby');
     const ids = String(errorId || '').split(/\s+/).filter(Boolean);
     const errorElement = ids.map((id) => document.getElementById(id)).find((element) => element?.classList.contains('field-error'));
@@ -17,39 +18,46 @@ export function clearFieldError(field) {
     if (errorElement) errorElement.textContent = '';
 }
 
-export function validateRequired(field, label) {
+export function validarCampoObrigatorio(field, label) {
     const isValid = Boolean(String(field.value || '').trim());
-    if (!isValid) setFieldError(field, t('{label} é obrigatório.', { label: t(label) }));
-    else clearFieldError(field);
+    if (!isValid) definirErroCampo(field, traduzir('{label} é obrigatório.', { label: traduzir(label) }));
+    else limparErroCampo(field);
     return isValid;
 }
 
-export function validateEmail(field) {
+export function validarEmail(field) {
     const value = field.value.trim();
     const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-    if (!isValid) setFieldError(field, t('Informe um e-mail válido.'));
-    else clearFieldError(field);
+    if (!isValid) definirErroCampo(field, traduzir('Informe um e-mail válido.'));
+    else limparErroCampo(field);
     return isValid;
 }
 
-export function validatePositiveNumber(field, label, minimum = 0) {
+export function validarCampoTelefoneBrasileiro(field) {
+    const isValid = validarTelefoneBrasileiro(field.value);
+    if (!isValid) definirErroCampo(field, traduzir('Informe um telefone válido com DDD.'));
+    else limparErroCampo(field);
+    return isValid;
+}
+
+export function validarNumeroPositivo(field, label, minimum = 0) {
     const value = Number(field.value);
     const isValid = Number.isFinite(value) && value > minimum;
     if (!isValid) {
-        setFieldError(field, t('{label} deve ser maior que {minimum}.', {
-            label: t(label), minimum: minimum > 0 ? formatCurrency(minimum) : minimum
+        definirErroCampo(field, traduzir('{label} deve ser maior que {minimum}.', {
+            label: traduzir(label), minimum: minimum > 0 ? formatarMoeda(minimum) : minimum
         }));
-    } else clearFieldError(field);
+    } else limparErroCampo(field);
     return isValid;
 }
 
-export function validatePassword(field, minimumLength = 8) {
+export function validarSenha(field, minimumLength = 8) {
     const isValid = field.value.length >= minimumLength;
-    if (!isValid) setFieldError(field, t('A senha deve ter pelo menos {minimumLength} caracteres.', { minimumLength }));
-    else clearFieldError(field);
+    if (!isValid) definirErroCampo(field, traduzir('A senha deve ter pelo menos {minimumLength} caracteres.', { minimumLength }));
+    else limparErroCampo(field);
     return isValid;
 }
 
-export function focusFirstInvalid(form) {
+export function focarPrimeiroCampoInvalido(form) {
     form.querySelector('[aria-invalid="true"]')?.focus();
 }

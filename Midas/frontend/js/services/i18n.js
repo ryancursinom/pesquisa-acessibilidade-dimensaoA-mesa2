@@ -1,4 +1,4 @@
-import { getSettings } from './settingsService.js';
+import { obterConfiguracoes } from './settingsService.js';
 
 const SUPPORTED_LANGUAGES = new Set(['pt-BR', 'en-US', 'es-ES', 'zh-CN']);
 const TRANSLATIONS = {
@@ -197,6 +197,7 @@ const TRANSLATIONS = {
     "Duração do leilão": "Auction duration",
     "Dê-nos o seu feedback": "Give us your feedback",
     "E-mail": "Email",
+    "Este leilão foi encerrado sem vencedor.": "This auction ended without a winner.",
     "ENCERRADO": "ENDED",
     "Editar Leilão": "Edit Auction",
     "Editar {title}": "Edit {title}",
@@ -254,6 +255,7 @@ const TRANSLATIONS = {
     "Informações de usuário": "User information",
     "Informações transparentes sobre itens, lances, encerramentos e compras.": "Transparent information about items, bids, endings, and purchases.",
     "Informe um e-mail válido.": "Enter a valid email address.",
+    "Informe um telefone válido com DDD.": "Enter a valid phone number with area code.",
     "Ir para a página inicial do Midas": "Go to the Midas home page",
     "Ir para o Checkout": "Go to Checkout",
     "Ir à Loja Oficial Midas": "Go to the Midas Official Store",
@@ -464,6 +466,7 @@ const TRANSLATIONS = {
     "Vendas constantes": "Ongoing sales",
     "Vendedor": "Seller",
     "Vendedor Midas": "Midas Seller",
+    "Vencedor do leilão": "Auction winner",
     "Ver Detalhes": "View Details",
     "Ver Lances": "View Bids",
     "Ver itens anteriores": "View previous items",
@@ -685,6 +688,7 @@ const TRANSLATIONS = {
     "Duração do leilão": "Duración de la subasta",
     "Dê-nos o seu feedback": "Danos tu opinión",
     "E-mail": "Correo electrónico",
+    "Este leilão foi encerrado sem vencedor.": "Esta subasta terminó sin ganador.",
     "ENCERRADO": "FINALIZADO",
     "Editar Leilão": "Editar Subasta",
     "Editar {title}": "Editar {title}",
@@ -742,6 +746,7 @@ const TRANSLATIONS = {
     "Informações de usuário": "Información del usuario",
     "Informações transparentes sobre itens, lances, encerramentos e compras.": "Información transparente sobre artículos, pujas, cierres y compras.",
     "Informe um e-mail válido.": "Introduce un correo electrónico válido.",
+    "Informe um telefone válido com DDD.": "Introduce un teléfono válido con código de área.",
     "Ir para a página inicial do Midas": "Ir a la página principal de Midas",
     "Ir para o Checkout": "Ir a finalizar compra",
     "Ir à Loja Oficial Midas": "Ir a la Tienda Oficial Midas",
@@ -952,6 +957,7 @@ const TRANSLATIONS = {
     "Vendas constantes": "Ventas constantes",
     "Vendedor": "Vendedor",
     "Vendedor Midas": "Vendedor Midas",
+    "Vencedor do leilão": "Ganador de la subasta",
     "Ver Detalhes": "Ver Detalles",
     "Ver Lances": "Ver Pujas",
     "Ver itens anteriores": "Ver artículos anteriores",
@@ -1173,6 +1179,7 @@ const TRANSLATIONS = {
     "Duração do leilão": "拍卖时长",
     "Dê-nos o seu feedback": "请告诉我们您的意见",
     "E-mail": "电子邮箱",
+    "Este leilão foi encerrado sem vencedor.": "此拍卖已结束，但无人胜出。",
     "ENCERRADO": "已结束",
     "Editar Leilão": "编辑拍卖",
     "Editar {title}": "编辑 {title}",
@@ -1230,6 +1237,7 @@ const TRANSLATIONS = {
     "Informações de usuário": "用户信息",
     "Informações transparentes sobre itens, lances, encerramentos e compras.": "清晰透明地展示商品、出价、结束时间和购买信息。",
     "Informe um e-mail válido.": "请输入有效的电子邮箱地址。",
+    "Informe um telefone válido com DDD.": "请输入带区号的有效电话号码。",
     "Ir para a página inicial do Midas": "前往 Midas 首页",
     "Ir para o Checkout": "前往结账",
     "Ir à Loja Oficial Midas": "前往 Midas 官方商店",
@@ -1440,6 +1448,7 @@ const TRANSLATIONS = {
     "Vendas constantes": "持续成交",
     "Vendedor": "卖家",
     "Vendedor Midas": "Midas 卖家",
+    "Vencedor do leilão": "拍卖胜出者",
     "Ver Detalhes": "查看详情",
     "Ver Lances": "查看出价",
     "Ver itens anteriores": "查看上一批商品",
@@ -1470,70 +1479,70 @@ const TRANSLATIONS = {
 
 const TRANSLATABLE_ATTRIBUTES = ['placeholder', 'aria-label', 'title', 'alt'];
 
-export function getCurrentLanguage() {
-    const language = getSettings().language;
+export function obterIdiomaAtual() {
+    const language = obterConfiguracoes().language;
     return SUPPORTED_LANGUAGES.has(language) ? language : 'pt-BR';
 }
 
-export function getCurrentLocale() {
-    return getCurrentLanguage();
+export function obterLocalidadeAtual() {
+    return obterIdiomaAtual();
 }
 
-function interpolate(value, params) {
+function interpolar(value, params) {
     return Object.entries(params).reduce(
         (text, [key, replacement]) => text.replaceAll(`{${key}}`, String(replacement)),
         value
     );
 }
 
-export function t(source, params = {}) {
-    const language = getCurrentLanguage();
+export function traduzir(source, params = {}) {
+    const language = obterIdiomaAtual();
     const translated = language === 'pt-BR' ? source : (TRANSLATIONS[language]?.[source] || source);
-    return interpolate(translated, params);
+    return interpolar(translated, params);
 }
 
-function translateTextNode(node) {
+function traduzirNoTexto(node) {
     const source = node.nodeValue.trim();
     if (!source) return;
-    const translated = t(source);
+    const translated = traduzir(source);
     if (translated === source) return;
     const leading = node.nodeValue.match(/^\s*/)?.[0] || '';
     const trailing = node.nodeValue.match(/\s*$/)?.[0] || '';
     node.nodeValue = `${leading}${translated}${trailing}`;
 }
 
-function translateAttributes(element) {
+function traduzirAtributos(element) {
     TRANSLATABLE_ATTRIBUTES.forEach((attribute) => {
         const source = element.getAttribute(attribute);
-        if (source) element.setAttribute(attribute, t(source));
+        if (source) element.setAttribute(attribute, traduzir(source));
     });
     if (element.matches('meta[name="description"][content]')) {
-        element.setAttribute('content', t(element.getAttribute('content')));
+        element.setAttribute('content', traduzir(element.getAttribute('content')));
     }
 }
 
-function shouldSkip(element) {
+function deveIgnorarElemento(element) {
     return element.closest('script, style, textarea, [data-no-translate]');
 }
 
-export function translatePage(root = document) {
-    if (getCurrentLanguage() === 'pt-BR') return;
+export function traduzirPagina(root = document) {
+    if (obterIdiomaAtual() === 'pt-BR') return;
     const rootElement = root.nodeType === Node.ELEMENT_NODE ? root : document.documentElement;
-    if (rootElement instanceof Element && !shouldSkip(rootElement)) translateAttributes(rootElement);
+    if (rootElement instanceof Element && !deveIgnorarElemento(rootElement)) traduzirAtributos(rootElement);
     const elements = root.querySelectorAll ? root.querySelectorAll('*') : [];
     elements.forEach((element) => {
-        if (!shouldSkip(element)) translateAttributes(element);
+        if (!deveIgnorarElemento(element)) traduzirAtributos(element);
     });
     const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
     const nodes = [];
     while (walker.nextNode()) {
         const parent = walker.currentNode.parentElement;
-        if (parent && !shouldSkip(parent)) nodes.push(walker.currentNode);
+        if (parent && !deveIgnorarElemento(parent)) nodes.push(walker.currentNode);
     }
-    nodes.forEach(translateTextNode);
+    nodes.forEach(traduzirNoTexto);
 }
 
-export function initI18n() {
-    document.documentElement.lang = getCurrentLanguage();
-    translatePage(document);
+export function inicializarTraducao() {
+    document.documentElement.lang = obterIdiomaAtual();
+    traduzirPagina(document);
 }

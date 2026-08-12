@@ -1,23 +1,28 @@
-const CLOSED_STATUSES = new Set(['CLOSED', 'FINALIZADO', 'CANCELADO']);
+const CLOSED_STATUSES = new Set(['CLOSED', 'FINALIZADO', 'ENCERRADO', 'CANCELADO']);
+const FINISHED_STATUSES = new Set(['CLOSED', 'FINALIZADO', 'ENCERRADO']);
 const ACTIVE_STATUSES = new Set(['ACTIVE', 'OPEN', 'ATIVO']);
 
-function normalizeStatus(status) {
+function normalizarStatus(status) {
     return String(status || '').toUpperCase();
 }
 
-export function isAuctionClosed(status) {
-    return CLOSED_STATUSES.has(normalizeStatus(status));
+export function verificarLeilaoEncerrado(status) {
+    return CLOSED_STATUSES.has(normalizarStatus(status));
 }
 
-export function getAuctionStatusClass(status) {
-    const normalized = normalizeStatus(status);
+export function verificarLeilaoFinalizado(status) {
+    return FINISHED_STATUSES.has(normalizarStatus(status));
+}
+
+export function obterClasseStatusLeilao(status) {
+    const normalized = normalizarStatus(status);
     if (CLOSED_STATUSES.has(normalized)) return 'closed';
     if (ACTIVE_STATUSES.has(normalized)) return 'active';
     return 'pending';
 }
 
-export function getAuctionStatusLabel(status) {
-    const normalized = normalizeStatus(status);
+export function obterRotuloStatusLeilao(status) {
+    const normalized = normalizarStatus(status);
     if (normalized === 'CANCELADO') return 'CANCELADO';
     if (CLOSED_STATUSES.has(normalized)) return 'ENCERRADO';
     if (ACTIVE_STATUSES.has(normalized)) return 'AO VIVO';

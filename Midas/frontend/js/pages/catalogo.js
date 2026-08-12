@@ -1,12 +1,12 @@
-import { createAuctionCard } from '../components/auctionCard.js';
-import { debounce, filterAuctions, sortAuctions } from '../components/auctionFilters.js';
-import { syncBrandField } from '../components/catalogConfig.js';
-import { appendChildren, clearElement, createElement } from '../components/dom.js';
-import { getUserErrorMessage } from '../components/userError.js';
-import { renderState } from '../components/statusMessage.js';
-import { getAuctions, setFavorite } from '../services/auctionService.js';
-import { normalizeCollection } from '../services/api.js';
-import { t } from '../services/i18n.js';
+import { criarCardLeilao } from '../components/auctionCard.js';
+import { adiarExecucao, filtrarLeiloes, ordenarLeiloes } from '../components/auctionFilters.js';
+import { sincronizarCampoMarca } from '../components/catalogConfig.js';
+import { adicionarElementosFilhos, limparElemento, criarElemento } from '../components/dom.js';
+import { obterMensagemErroUsuario } from '../components/userError.js';
+import { renderizarEstado } from '../components/statusMessage.js';
+import { obterLeiloes, definirFavorito } from '../services/auctionService.js';
+import { normalizarColecao } from '../services/api.js';
+import { traduzir } from '../services/i18n.js';
 
 const form = document.getElementById('catalog-search-form');
 const content = document.getElementById('catalog-content');
@@ -16,7 +16,7 @@ const brandField = document.getElementById('catalog-brand-field');
 const brandInput = document.getElementById('catalog-brand');
 let auctions = [];
 
-function getFilters() {
+function obterFiltros() {
     const data = new FormData(form);
     return {
         search: data.get('search'),
@@ -29,7 +29,7 @@ function getFilters() {
     };
 }
 
-function groupByCategory(items) {
+function agruparPorCategoria(items) {
     return items.reduce((groups, auction) => {
         const category = auction.category || 'Outros';
         if (!groups.has(category)) groups.set(category, []);
@@ -38,108 +38,108 @@ function groupByCategory(items) {
     }, new Map());
 }
 
-function createCategoryHeader(category, count) {
-    const header = createElement('header', { className: 'catalog-category-header' });
-    const titleGroup = createElement('div', { className: 'catalog-category-title' });
+function criarCabecalhoCategoria(category, count) {
+    const header = criarElemento('header', { className: 'catalog-category-header' });
+    const titleGroup = criarElemento('div', { className: 'catalog-category-title' });
     titleGroup.append(
-        createElement('h2', { text: t(category) }),
-        createElement('span', {
+        criarElemento('h2', { text: traduzir(category) }),
+        criarElemento('span', {
             className: 'catalog-category-count',
-            text: t('Itens encontrados: {count}', { count })
+            text: traduzir('Itens encontrados: {count}', { count })
         })
     );
     header.appendChild(titleGroup);
     return header;
 }
 
-function createCategoryAction(category) {
-    const wrapper = createElement('div', { className: 'catalog-category-action' });
-    const link = createElement('a', {
+function criarAcaoCategoria(category) {
+    const wrapper = criarElemento('div', { className: 'catalog-category-action' });
+    const link = criarElemento('a', {
         className: 'btn-secondary catalog-category-link',
-        text: t('Acessar categoria de {category}', { category: t(category) }),
+        text: traduzir('Acessar categoria de {category}', { category: traduzir(category) }),
         attrs: { href: `categoria.html?categoria=${encodeURIComponent(category)}` }
     });
     wrapper.appendChild(link);
     return wrapper;
 }
 
-function createCategoryBlock(category, items) {
-    const section = createElement('section', { className: 'catalog-category-block' });
-    const grid = createElement('div', { className: 'auctions-grid' });
-    items.forEach((auction) => grid.appendChild(createAuctionCard(auction, { showFavorite: true })));
-    appendChildren(section, [
-        createCategoryHeader(category, items.length),
+function criarBlocoCategoria(category, items) {
+    const section = criarElemento('section', { className: 'catalog-category-block' });
+    const grid = criarElemento('div', { className: 'auctions-grid' });
+    items.forEach((auction) => grid.appendChild(criarCardLeilao(auction, { showFavorite: true })));
+    adicionarElementosFilhos(section, [
+        criarCabecalhoCategoria(category, items.length),
         grid,
-        createCategoryAction(category)
+        criarAcaoCategoria(category)
     ]);
     return section;
 }
 
-function renderCatalog() {
-    const filters = getFilters();
-    const filtered = sortAuctions(filterAuctions(auctions, filters), filters.sort);
-    clearElement(content);
+function renderizarCatalogo() {
+    const filters = obterFiltros();
+    const filtered = ordenarLeiloes(filtrarLeiloes(auctions, filters), filters.sort);
+    limparElemento(content);
     status.textContent = '';
 
     if (!filtered.length) {
-        renderState(content, 'empty', t('Nenhum item corresponde aos filtros selecionados. Tente limpar alguns filtros.'));
+        renderizarEstado(content, 'empty', traduzir('Nenhum item corresponde aos filtros selecionados. Tente limpar alguns filtros.'));
         return;
     }
 
-    groupByCategory(filtered).forEach((items, category) => {
-        content.appendChild(createCategoryBlock(category, items));
+    agruparPorCategoria(filtered).forEach((items, category) => {
+        content.appendChild(criarBlocoCategoria(category, items));
     });
 }
 
-async function toggleFavorite(button) {
+async function alternarFavorito(button) {
     const auction = auctions.find((item) => String(item.id) === String(button.dataset.auctionId));
     if (!auction) return;
 
     button.disabled = true;
     try {
-        await setFavorite(auction.id, !auction.isFavorite);
+        await definirFavorito(auction.id, !auction.isFavorite);
         auction.isFavorite = !auction.isFavorite;
-        renderCatalog();
-        status.textContent = t(auction.isFavorite
+        renderizarCatalogo();
+        status.textContent = traduzir(auction.isFavorite
             ? 'Leilão adicionado aos favoritos.'
             : 'Leilão removido dos favoritos.');
     } catch (error) {
-        status.textContent = getUserErrorMessage(
+        status.textContent = obterMensagemErroUsuario(
             error,
-            t('Não conseguimos atualizar seus favoritos agora. Tente novamente em instantes.')
+            traduzir('Não conseguimos atualizar seus favoritos agora. Tente novamente em instantes.')
         );
     } finally {
         button.disabled = false;
     }
 }
 
-async function loadCatalog() {
-    renderState(content, 'loading', t('Carregando catálogo...'));
+async function carregarCatalogo() {
+    renderizarEstado(content, 'loading', traduzir('Carregando catálogo...'));
     try {
-        auctions = normalizeCollection(await getAuctions());
-        renderCatalog();
+        auctions = normalizarColecao(await obterLeiloes());
+        renderizarCatalogo();
     } catch (error) {
-        renderState(content, 'error', getUserErrorMessage(
+        renderizarEstado(content, 'error', obterMensagemErroUsuario(
             error,
-            t('Não conseguimos carregar o catálogo agora. Tente novamente em instantes.')
+            traduzir('Não conseguimos carregar o catálogo agora. Tente novamente em instantes.')
         ));
         status.textContent = '';
     }
 }
 
-form.addEventListener('input', debounce(renderCatalog));
+form.addEventListener('input', adiarExecucao(renderizarCatalogo));
 form.addEventListener('change', (event) => {
-    if (event.target === categorySelect) syncBrandField(categorySelect.value, brandField, brandInput);
-    renderCatalog();
+    if (event.target === categorySelect) sincronizarCampoMarca(categorySelect.value, brandField, brandInput);
+    renderizarCatalogo();
 });
 form.addEventListener('reset', () => window.setTimeout(() => {
-    syncBrandField(categorySelect.value, brandField, brandInput);
-    renderCatalog();
+    sincronizarCampoMarca(categorySelect.value, brandField, brandInput);
+    renderizarCatalogo();
 }));
 content.addEventListener('click', (event) => {
     const favoriteButton = event.target.closest('[data-action="favorite"]');
-    if (favoriteButton) toggleFavorite(favoriteButton);
+    if (favoriteButton) alternarFavorito(favoriteButton);
 });
 
-syncBrandField(categorySelect.value, brandField, brandInput);
-loadCatalog();
+sincronizarCampoMarca(categorySelect.value, brandField, brandInput);
+carregarCatalogo();

@@ -1,15 +1,15 @@
-import { createElement } from './dom.js';
-import { createIcon } from './icons.js';
-import { getSettings, resetSettings, saveSettings } from '../services/settingsService.js';
-import { closeDialog, createDialogCloseButton, initDialog, openDialog } from './modal.js';
-import { t } from '../services/i18n.js';
+import { criarElemento } from './dom.js';
+import { criarIcone } from './icons.js';
+import { obterConfiguracoes, restaurarConfiguracoes, salvarConfiguracoes } from '../services/settingsService.js';
+import { fecharDialogo, criarBotaoFecharDialogo, inicializarDialogo, abrirDialogo } from './modal.js';
+import { traduzir } from '../services/i18n.js';
 
-function createSelect(id, label, options, value) {
-    const wrapper = createElement('div', { className: 'settings-field' });
-    const labelElement = createElement('label', { text: t(label), attrs: { for: id } });
-    const select = createElement('select', { attrs: { id, name: id } });
+function criarCampoSelecao(id, label, options, value) {
+    const wrapper = criarElemento('div', { className: 'settings-field' });
+    const labelElement = criarElemento('label', { text: traduzir(label), attrs: { for: id } });
+    const select = criarElemento('select', { attrs: { id, name: id } });
     options.forEach(([optionValue, text]) => {
-        const option = createElement('option', { text: t(text), attrs: { value: optionValue } });
+        const option = criarElemento('option', { text: traduzir(text), attrs: { value: optionValue } });
         option.selected = optionValue === value;
         select.appendChild(option);
     });
@@ -17,71 +17,71 @@ function createSelect(id, label, options, value) {
     return wrapper;
 }
 
-function createCheckbox(id, label, checked) {
-    const wrapper = createElement('label', { className: 'checkbox-row', attrs: { for: id } });
-    const input = createElement('input', { attrs: { id, name: id, type: 'checkbox' } });
+function criarCaixaSelecao(id, label, checked) {
+    const wrapper = criarElemento('label', { className: 'checkbox-row', attrs: { for: id } });
+    const input = criarElemento('input', { attrs: { id, name: id, type: 'checkbox' } });
     input.checked = checked;
-    wrapper.append(input, createElement('span', { text: t(label) }));
+    wrapper.append(input, criarElemento('span', { text: traduzir(label) }));
     return wrapper;
 }
 
-function createPanelForm(settings) {
-    const form = createElement('form', { className: 'accessibility-form' });
+function criarFormularioPainel(settings) {
+    const form = criarElemento('form', { className: 'accessibility-form' });
     form.append(
-        createSelect('a11y-theme', 'Tema', [['dark', 'Escuro'], ['light', 'Claro']], settings.theme),
-        createSelect('a11y-contrast', 'Contraste', [['normal', 'Normal'], ['high', 'Alto contraste']], settings.contrast),
-        createSelect('a11y-font', 'Tamanho da fonte', [['small', 'Pequena'], ['medium', 'Média'], ['large', 'Grande'], ['xlarge', 'Muito grande']], settings.fontSize),
-        createSelect('a11y-colors', 'Ajuste de cores', [['none', 'Padrão'], ['protanopia', 'Protanopia'], ['deuteranopia', 'Deuteranopia'], ['tritanopia', 'Tritanopia']], settings.colorVision),
-        createCheckbox('a11y-motion', 'Reduzir animações', settings.reduceMotion)
+        criarCampoSelecao('a11y-theme', 'Tema', [['dark', 'Escuro'], ['light', 'Claro']], settings.theme),
+        criarCampoSelecao('a11y-contrast', 'Contraste', [['normal', 'Normal'], ['high', 'Alto contraste']], settings.contrast),
+        criarCampoSelecao('a11y-font', 'Tamanho da fonte', [['small', 'Pequena'], ['medium', 'Média'], ['large', 'Grande'], ['xlarge', 'Muito grande']], settings.fontSize),
+        criarCampoSelecao('a11y-colors', 'Ajuste de cores', [['none', 'Padrão'], ['protanopia', 'Protanopia'], ['deuteranopia', 'Deuteranopia'], ['tritanopia', 'Tritanopia']], settings.colorVision),
+        criarCaixaSelecao('a11y-motion', 'Reduzir animações', settings.reduceMotion)
     );
-    const actions = createElement('div', { className: 'dialog-actions' });
+    const actions = criarElemento('div', { className: 'dialog-actions' });
     actions.append(
-        createElement('button', { className: 'btn-secondary', text: t('Cancelar'), attrs: { type: 'button' }, dataset: { dialogClose: 'true' } }),
-        createElement('button', { className: 'btn-secondary', text: t('Restaurar padrão'), attrs: { type: 'button' }, dataset: { resetA11y: 'true' } }),
-        createElement('button', { className: 'btn-primary', text: t('Aplicar'), attrs: { type: 'submit' } })
+        criarElemento('button', { className: 'btn-secondary', text: traduzir('Cancelar'), attrs: { type: 'button' }, dataset: { dialogClose: 'true' } }),
+        criarElemento('button', { className: 'btn-secondary', text: traduzir('Restaurar padrão'), attrs: { type: 'button' }, dataset: { resetA11y: 'true' } }),
+        criarElemento('button', { className: 'btn-primary', text: traduzir('Aplicar'), attrs: { type: 'submit' } })
     );
     form.appendChild(actions);
     return form;
 }
 
-function readForm(form) {
+function lerFormulario(form) {
     return {
         theme: form.elements['a11y-theme'].value,
         contrast: form.elements['a11y-contrast'].value,
         fontSize: form.elements['a11y-font'].value,
         colorVision: form.elements['a11y-colors'].value,
         reduceMotion: form.elements['a11y-motion'].checked,
-        language: getSettings().language
+        language: obterConfiguracoes().language
     };
 }
 
 
-export function initAccessibilityPanel() {
-    const button = createElement('button', {
-        className: 'accessibility-fab', attrs: { type: 'button', 'aria-label': t('Abrir painel de acessibilidade') }
+export function inicializarPainelAcessibilidade() {
+    const button = criarElemento('button', {
+        className: 'accessibility-fab', attrs: { type: 'button', 'aria-label': traduzir('Abrir painel de acessibilidade') }
     });
-    button.appendChild(createIcon('accessibility', { size: 30 }));
-    const dialog = createElement('dialog', {
+    button.appendChild(criarIcone('accessibility', { size: 30 }));
+    const dialog = criarElemento('dialog', {
         className: 'midas-dialog accessibility-dialog', attrs: { 'aria-labelledby': 'a11y-title' }
     });
-    const title = createElement('h2', { text: t('Acessibilidade'), attrs: { id: 'a11y-title' } });
-    const description = createElement('p', {
-        text: t('Personalize a visualização. As preferências ficam salvas neste navegador.')
+    const title = criarElemento('h2', { text: traduzir('Acessibilidade'), attrs: { id: 'a11y-title' } });
+    const description = criarElemento('p', {
+        text: traduzir('Personalize a visualização. As preferências ficam salvas neste navegador.')
     });
-    const form = createPanelForm(getSettings());
-    dialog.append(createDialogCloseButton(t('Fechar')), title, description, form);
+    const form = criarFormularioPainel(obterConfiguracoes());
+    dialog.append(criarBotaoFecharDialogo(traduzir('Fechar')), title, description, form);
     document.body.append(button, dialog);
-    initDialog(dialog);
+    inicializarDialogo(dialog);
 
-    button.addEventListener('click', () => openDialog(dialog, button));
+    button.addEventListener('click', () => abrirDialogo(dialog, button));
     form.addEventListener('submit', (event) => {
         event.preventDefault();
-        saveSettings(readForm(form));
-        closeDialog(dialog);
+        salvarConfiguracoes(lerFormulario(form));
+        fecharDialogo(dialog);
     });
     form.querySelector('[data-reset-a11y]').addEventListener('click', () => {
-        resetSettings();
-        closeDialog(dialog);
+        restaurarConfiguracoes();
+        fecharDialogo(dialog);
         window.location.reload();
     });
 }

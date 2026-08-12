@@ -1,8 +1,8 @@
-import { createElement, clearElement } from './dom.js';
+import { criarElemento, limparElemento } from './dom.js';
 
-export function renderState(container, type, message) {
-    clearElement(container);
-    const state = createElement('p', {
+export function renderizarEstado(container, type, message) {
+    limparElemento(container);
+    const state = criarElemento('p', {
         className: `${type}-state`,
         text: message,
         attrs: { role: type === 'error' ? 'alert' : 'status' }
@@ -11,7 +11,7 @@ export function renderState(container, type, message) {
     return state;
 }
 
-export function setLiveMessage(element, message, isError = false) {
+export function definirMensagemAoVivo(element, message, isError = false) {
     element.textContent = message;
     element.classList.toggle('form-status--error', isError);
     element.classList.toggle('form-status--success', !isError && Boolean(message));

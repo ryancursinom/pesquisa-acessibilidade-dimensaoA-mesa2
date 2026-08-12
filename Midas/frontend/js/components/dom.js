@@ -1,6 +1,6 @@
-import { getCurrentLocale, t } from '../services/i18n.js';
+import { obterLocalidadeAtual, traduzir } from '../services/i18n.js';
 
-export function createElement(tag, options = {}) {
+export function criarElemento(tag, options = {}) {
     const element = document.createElement(tag);
     const { className, text, attrs = {}, dataset = {} } = options;
     if (className) element.className = className;
@@ -14,24 +14,24 @@ export function createElement(tag, options = {}) {
     return element;
 }
 
-export function clearElement(element) {
+export function limparElemento(element) {
     while (element.firstChild) element.removeChild(element.firstChild);
 }
 
-export function appendChildren(parent, children) {
+export function adicionarElementosFilhos(parent, children) {
     children.filter(Boolean).forEach((child) => parent.appendChild(child));
     return parent;
 }
 
-export function formatCurrency(value) {
-    return new Intl.NumberFormat(getCurrentLocale(), {
+export function formatarMoeda(value) {
+    return new Intl.NumberFormat(obterLocalidadeAtual(), {
         style: 'currency', currency: 'BRL'
     }).format(Number(value || 0));
 }
 
-export function formatDateTime(value) {
-    if (!value) return t('Data não informada');
-    return new Intl.DateTimeFormat(getCurrentLocale(), {
+export function formatarDataHora(value) {
+    if (!value) return traduzir('Data não informada');
+    return new Intl.DateTimeFormat(obterLocalidadeAtual(), {
         dateStyle: 'medium', timeStyle: 'short'
     }).format(new Date(value));
 }
