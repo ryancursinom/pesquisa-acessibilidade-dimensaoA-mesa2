@@ -1,12 +1,16 @@
-from sqlalchemy import Column, Integer, String, Text
-
-from app.database import Base
+from pydantic import BaseModel
 
 
-class Produto(Base):
-    __tablename__ = "produtos"
+class Produto(BaseModel):
+    id: int
+    nome: str
+    imagem_url: str
 
-    id = Column(Integer, primary_key=True, index=True)
-    nome = Column(String(255), nullable=False)
-    descricao = Column(Text, nullable=True)
-    categoria = Column(String(100), nullable=True)
+
+class IdentidadeVisual(BaseModel):
+    cor_primaria: str | None = None
+    cor_secundaria: str | None = None
+    descricao_paleta: str | None = None
+    formato: str | None = None
+    descricao_formato: str | None = None
+    descricao_geral: str | None = None
