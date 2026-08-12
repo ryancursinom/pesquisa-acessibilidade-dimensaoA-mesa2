@@ -17,3 +17,14 @@ export function updatePassword(data) {
         body: JSON.stringify(data)
     });
 }
+
+
+export function updateProfilePhoto(file) {
+    const formData = new FormData();
+    formData.append('image', file);
+
+    return apiRequest('/users/me/photo', {
+        method: 'PUT',
+        body: formData
+    });
+}

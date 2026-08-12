@@ -1,6 +1,8 @@
 import { initAccessibilityPanel } from './components/accessibilityPanel.js';
 import { initFeedbackModal } from './components/feedbackModal.js';
+import { renderStaticIcons } from './components/icons.js';
 import { initSiteChrome } from './components/siteChrome.js';
+import { initI18n } from './services/i18n.js';
 import { applySettings } from './services/settingsService.js';
 
 const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -31,12 +33,44 @@ function initGlobalNavigation() {
     document.addEventListener('click', handleInternalNavigation);
 }
 
+
+function handleBackNavigation(event) {
+    const button = event.target.closest('[data-back-button]');
+    if (!button) return;
+
+    const fallback = button.dataset.backFallback || '../index.html';
+    const referrer = document.referrer;
+
+    if (referrer) {
+        const referrerUrl = new URL(referrer);
+        if (referrerUrl.origin === window.location.origin) {
+            window.history.back();
+            return;
+        }
+    }
+
+    window.location.href = fallback;
+}
+
+function initBackButtons() {
+    document.addEventListener('click', handleBackNavigation);
+}
+
+function syncSettingsAfterHistory() {
+    // O navegador pode restaurar uma página antiga pelo botão Voltar sem executar os módulos novamente.
+    applySettings();
+}
+
 function initGlobalFeatures() {
     applySettings();
+    initI18n();
     initSiteChrome();
     initAccessibilityPanel();
     initFeedbackModal();
+    renderStaticIcons();
     initGlobalNavigation();
+    initBackButtons();
+    window.addEventListener('pageshow', syncSettingsAfterHistory);
 }
 
 initGlobalFeatures();

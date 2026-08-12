@@ -1,8 +1,28 @@
 import { setLiveMessage } from '../components/statusMessage.js';
+import { logout } from '../services/authService.js';
+import { t } from '../services/i18n.js';
 import { getSettings, resetSettings, saveSettings } from '../services/settingsService.js';
 
 const form = document.getElementById('settings-form');
 const status = document.getElementById('settings-status');
+const layout = document.getElementById('settings-layout');
+const sidebar = document.getElementById('settings-profile-sidebar');
+const backButton = document.getElementById('settings-back-button');
+const siteHeader = document.getElementById('settings-site-header');
+const siteFooter = document.getElementById('settings-site-footer');
+
+function isProfileContext() {
+    return new URLSearchParams(window.location.search).get('origem') === 'perfil';
+}
+
+function configurePageContext() {
+    const profileContext = isProfileContext();
+    sidebar.hidden = !profileContext;
+    backButton.hidden = profileContext;
+    siteHeader.hidden = !profileContext;
+    siteFooter.hidden = true;
+    layout.classList.toggle('settings-layout--profile', profileContext);
+}
 
 function populateForm(settings) {
     form.elements.theme.value = settings.theme;
@@ -24,16 +44,36 @@ function readForm() {
     };
 }
 
+function reloadForLanguageChange(previousLanguage, nextLanguage) {
+    if (previousLanguage === nextLanguage) return false;
+    window.location.reload();
+    return true;
+}
+
 form.addEventListener('submit', (event) => {
     event.preventDefault();
-    saveSettings(readForm());
-    setLiveMessage(status, 'Configurações salvas.');
+    const previousLanguage = getSettings().language;
+    const settings = saveSettings(readForm());
+
+    if (!reloadForLanguageChange(previousLanguage, settings.language)) {
+        setLiveMessage(status, t('Configurações salvas.'));
+    }
 });
 
 document.getElementById('reset-settings').addEventListener('click', () => {
+    const previousLanguage = getSettings().language;
     const settings = resetSettings();
     populateForm(settings);
-    setLiveMessage(status, 'Configurações restauradas para o padrão.');
+
+    if (!reloadForLanguageChange(previousLanguage, settings.language)) {
+        setLiveMessage(status, t('Configurações restauradas para o padrão.'));
+    }
 });
 
+document.getElementById('settings-logout-button').addEventListener('click', () => {
+    logout();
+    window.location.href = 'login.html';
+});
+
+configurePageContext();
 populateForm(getSettings());

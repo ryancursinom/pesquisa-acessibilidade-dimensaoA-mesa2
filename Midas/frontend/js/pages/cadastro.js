@@ -1,6 +1,8 @@
 import { clearFieldError, focusFirstInvalid, setFieldError, validateEmail, validatePassword, validateRequired } from '../components/formValidation.js';
 import { setLiveMessage } from '../components/statusMessage.js';
+import { getUserErrorMessage } from '../components/userError.js';
 import { register } from '../services/authService.js';
+import { t } from '../services/i18n.js';
 
 const form = document.getElementById('register-form');
 const nameField = document.getElementById('register-name');
@@ -12,22 +14,22 @@ const status = document.getElementById('register-status');
 
 function validatePasswordConfirmation() {
     const valid = confirmField.value === passwordField.value && Boolean(confirmField.value);
-    if (!valid) setFieldError(confirmField, 'As senhas precisam ser iguais.');
+    if (!valid) setFieldError(confirmField, t('As senhas precisam ser iguais.'));
     else clearFieldError(confirmField);
     return valid;
 }
 
 function validateTerms() {
     const valid = termsField.checked;
-    if (!valid) setFieldError(termsField, 'Aceite os termos para continuar.');
+    if (!valid) setFieldError(termsField, t('Aceite os termos para continuar.'));
     else clearFieldError(termsField);
     return valid;
 }
 
 function validateForm() {
     const checks = [
-        validateRequired(nameField, 'Nome'),
-        validateRequired(emailField, 'E-mail') && validateEmail(emailField),
+        validateRequired(nameField, t('Nome')),
+        validateRequired(emailField, t('E-mail')) && validateEmail(emailField),
         validatePassword(passwordField),
         validatePasswordConfirmation(),
         validateTerms()
@@ -41,13 +43,13 @@ async function handleSubmit(event) {
     if (!validateForm()) return;
     const submitButton = form.querySelector('[type="submit"]');
     submitButton.disabled = true;
-    setLiveMessage(status, 'Criando conta...');
+    setLiveMessage(status, t('Criando conta...'));
     try {
         const result = await register({ name: nameField.value.trim(), email: emailField.value.trim(), password: passwordField.value });
-        setLiveMessage(status, 'Conta criada com sucesso. Redirecionando...');
+        setLiveMessage(status, t('Conta criada com sucesso. Redirecionando...'));
         window.location.href = result?.token || result?.accessToken ? 'perfil.html' : 'login.html';
     } catch (error) {
-        setLiveMessage(status, error.message, true);
+        setLiveMessage(status, getUserErrorMessage(error, t('Não conseguimos criar sua conta agora. Revise os dados e tente novamente.')), true);
     } finally {
         submitButton.disabled = false;
     }

@@ -1,13 +1,15 @@
 import { createElement } from './dom.js';
+import { createIcon } from './icons.js';
 import { getSettings, resetSettings, saveSettings } from '../services/settingsService.js';
-import { closeDialog, initDialog, openDialog } from './modal.js';
+import { closeDialog, createDialogCloseButton, initDialog, openDialog } from './modal.js';
+import { t } from '../services/i18n.js';
 
 function createSelect(id, label, options, value) {
     const wrapper = createElement('div', { className: 'settings-field' });
-    const labelElement = createElement('label', { text: label, attrs: { for: id } });
+    const labelElement = createElement('label', { text: t(label), attrs: { for: id } });
     const select = createElement('select', { attrs: { id, name: id } });
     options.forEach(([optionValue, text]) => {
-        const option = createElement('option', { text, attrs: { value: optionValue } });
+        const option = createElement('option', { text: t(text), attrs: { value: optionValue } });
         option.selected = optionValue === value;
         select.appendChild(option);
     });
@@ -19,7 +21,7 @@ function createCheckbox(id, label, checked) {
     const wrapper = createElement('label', { className: 'checkbox-row', attrs: { for: id } });
     const input = createElement('input', { attrs: { id, name: id, type: 'checkbox' } });
     input.checked = checked;
-    wrapper.append(input, createElement('span', { text: label }));
+    wrapper.append(input, createElement('span', { text: t(label) }));
     return wrapper;
 }
 
@@ -34,9 +36,9 @@ function createPanelForm(settings) {
     );
     const actions = createElement('div', { className: 'dialog-actions' });
     actions.append(
-        createElement('button', { className: 'btn-secondary', text: 'Cancelar', attrs: { type: 'button' }, dataset: { dialogClose: 'true' } }),
-        createElement('button', { className: 'btn-secondary', text: 'Restaurar padrão', attrs: { type: 'button' }, dataset: { resetA11y: 'true' } }),
-        createElement('button', { className: 'btn-primary', text: 'Aplicar', attrs: { type: 'submit' } })
+        createElement('button', { className: 'btn-secondary', text: t('Cancelar'), attrs: { type: 'button' }, dataset: { dialogClose: 'true' } }),
+        createElement('button', { className: 'btn-secondary', text: t('Restaurar padrão'), attrs: { type: 'button' }, dataset: { resetA11y: 'true' } }),
+        createElement('button', { className: 'btn-primary', text: t('Aplicar'), attrs: { type: 'submit' } })
     );
     form.appendChild(actions);
     return form;
@@ -53,16 +55,21 @@ function readForm(form) {
     };
 }
 
+
 export function initAccessibilityPanel() {
     const button = createElement('button', {
-        className: 'accessibility-fab', text: '♿',
-        attrs: { type: 'button', 'aria-label': 'Abrir painel de acessibilidade' }
+        className: 'accessibility-fab', attrs: { type: 'button', 'aria-label': t('Abrir painel de acessibilidade') }
     });
-    const dialog = createElement('dialog', { className: 'midas-dialog accessibility-dialog', attrs: { 'aria-labelledby': 'a11y-title' } });
-    const title = createElement('h2', { text: 'Acessibilidade', attrs: { id: 'a11y-title' } });
-    const description = createElement('p', { text: 'Personalize a visualização. As preferências ficam salvas neste navegador.' });
+    button.appendChild(createIcon('accessibility', { size: 30 }));
+    const dialog = createElement('dialog', {
+        className: 'midas-dialog accessibility-dialog', attrs: { 'aria-labelledby': 'a11y-title' }
+    });
+    const title = createElement('h2', { text: t('Acessibilidade'), attrs: { id: 'a11y-title' } });
+    const description = createElement('p', {
+        text: t('Personalize a visualização. As preferências ficam salvas neste navegador.')
+    });
     const form = createPanelForm(getSettings());
-    dialog.append(title, description, form);
+    dialog.append(createDialogCloseButton(t('Fechar')), title, description, form);
     document.body.append(button, dialog);
     initDialog(dialog);
 
@@ -74,7 +81,7 @@ export function initAccessibilityPanel() {
     });
     form.querySelector('[data-reset-a11y]').addEventListener('click', () => {
         resetSettings();
-        dialog.close();
+        closeDialog(dialog);
         window.location.reload();
     });
 }

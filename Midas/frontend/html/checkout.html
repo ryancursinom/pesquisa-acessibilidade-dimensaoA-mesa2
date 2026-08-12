@@ -3,16 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="../assets/img/favicon.svg">
     <title>Checkout - Midas</title>
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="../css/checkout.css">
 </head>
 <body class="dark-page checkout-page" data-root=".." data-page="checkout">
     <a class="skip-link" href="#conteudo-principal">Pular para o conteúdo principal</a>
-    <header class="navbar" data-site-header></header>
+    <header class="flow-header">
+        <div class="container flow-header__content">
+            <a class="logo" href="../index.html" aria-label="Ir para a página inicial do Midas">
+                <img src="../assets/img/logo.png" alt="Midas">
+            </a>
+        </div>
+    </header>
 
     <main id="conteudo-principal" class="page-shell" tabindex="-1">
         <div class="container">
+            <button class="back-button" type="button" data-back-button data-back-fallback="carrinho.html">
+                <span data-icon="chevronLeft" aria-hidden="true"></span>
+                Voltar
+            </button>
+
             <header class="page-heading">
                 <h1 id="checkout-title">Finalizar compra</h1>
                 <p id="checkout-description">Preencha os dados abaixo. Este checkout é acadêmico e não realiza cobrança real.</p>
@@ -95,7 +107,6 @@
         </div>
     </main>
 
-    <footer class="footer" data-site-footer></footer>
     <script type="module" src="../js/main.js"></script>
     <script type="module" src="../js/pages/checkout.js"></script>
 </body>

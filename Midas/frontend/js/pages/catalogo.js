@@ -1,14 +1,19 @@
 import { createAuctionCard } from '../components/auctionCard.js';
 import { debounce, filterAuctions, sortAuctions } from '../components/auctionFilters.js';
+import { syncBrandField } from '../components/catalogConfig.js';
 import { appendChildren, clearElement, createElement } from '../components/dom.js';
+import { getUserErrorMessage } from '../components/userError.js';
 import { renderState } from '../components/statusMessage.js';
 import { getAuctions, setFavorite } from '../services/auctionService.js';
 import { normalizeCollection } from '../services/api.js';
-import { addToCart } from '../services/cartService.js';
+import { t } from '../services/i18n.js';
 
 const form = document.getElementById('catalog-search-form');
 const content = document.getElementById('catalog-content');
-const summary = document.getElementById('catalog-result-summary');
+const status = document.getElementById('catalog-status');
+const categorySelect = document.getElementById('catalog-category');
+const brandField = document.getElementById('catalog-brand-field');
+const brandInput = document.getElementById('catalog-brand');
 let auctions = [];
 
 function getFilters() {
@@ -16,8 +21,11 @@ function getFilters() {
     return {
         search: data.get('search'),
         sort: data.get('sort'),
-        saleType: data.get('saleType'),
-        status: data.get('status')
+        category: data.get('category'),
+        minPrice: data.get('minPrice'),
+        maxPrice: data.get('maxPrice'),
+        ending: data.get('ending'),
+        brand: data.get('brand')
     };
 }
 
@@ -30,19 +38,40 @@ function groupByCategory(items) {
     }, new Map());
 }
 
-function createCategoryBlock(category, items) {
-    const section = createElement('section', { className: 'catalog-category-block' });
+function createCategoryHeader(category, count) {
     const header = createElement('header', { className: 'catalog-category-header' });
-    const title = createElement('h2', { text: category });
+    const titleGroup = createElement('div', { className: 'catalog-category-title' });
+    titleGroup.append(
+        createElement('h2', { text: t(category) }),
+        createElement('span', {
+            className: 'catalog-category-count',
+            text: t('Itens encontrados: {count}', { count })
+        })
+    );
+    header.appendChild(titleGroup);
+    return header;
+}
+
+function createCategoryAction(category) {
+    const wrapper = createElement('div', { className: 'catalog-category-action' });
     const link = createElement('a', {
-        className: 'catalog-category-link',
-        text: `Acessar categoria de ${category}`,
+        className: 'btn-secondary catalog-category-link',
+        text: t('Acessar categoria de {category}', { category: t(category) }),
         attrs: { href: `categoria.html?categoria=${encodeURIComponent(category)}` }
     });
+    wrapper.appendChild(link);
+    return wrapper;
+}
+
+function createCategoryBlock(category, items) {
+    const section = createElement('section', { className: 'catalog-category-block' });
     const grid = createElement('div', { className: 'auctions-grid' });
     items.forEach((auction) => grid.appendChild(createAuctionCard(auction, { showFavorite: true })));
-    appendChildren(header, [title, link]);
-    appendChildren(section, [header, grid]);
+    appendChildren(section, [
+        createCategoryHeader(category, items.length),
+        grid,
+        createCategoryAction(category)
+    ]);
     return section;
 }
 
@@ -50,10 +79,10 @@ function renderCatalog() {
     const filters = getFilters();
     const filtered = sortAuctions(filterAuctions(auctions, filters), filters.sort);
     clearElement(content);
-    summary.textContent = `${filtered.length} item(ns) encontrado(s).`;
+    status.textContent = '';
 
     if (!filtered.length) {
-        renderState(content, 'empty', 'Nenhum item corresponde aos filtros selecionados.');
+        renderState(content, 'empty', t('Nenhum item corresponde aos filtros selecionados. Tente limpar alguns filtros.'));
         return;
     }
 
@@ -63,54 +92,54 @@ function renderCatalog() {
 }
 
 async function toggleFavorite(button) {
-    const id = button.dataset.auctionId;
-    const auction = auctions.find((item) => String(item.id) === String(id));
+    const auction = auctions.find((item) => String(item.id) === String(button.dataset.auctionId));
     if (!auction) return;
-    const nextFavorite = !auction.isFavorite;
+
     button.disabled = true;
     try {
-        await setFavorite(id, nextFavorite);
-        auction.isFavorite = nextFavorite;
+        await setFavorite(auction.id, !auction.isFavorite);
+        auction.isFavorite = !auction.isFavorite;
         renderCatalog();
+        status.textContent = t(auction.isFavorite
+            ? 'Leilão adicionado aos favoritos.'
+            : 'Leilão removido dos favoritos.');
     } catch (error) {
-        summary.textContent = error.message;
+        status.textContent = getUserErrorMessage(
+            error,
+            t('Não conseguimos atualizar seus favoritos agora. Tente novamente em instantes.')
+        );
     } finally {
         button.disabled = false;
     }
 }
 
-function addImmediateItem(id) {
-    const auction = auctions.find((item) => String(item.id) === String(id));
-    if (!auction) return;
-    addToCart({
-        id: auction.id,
-        title: auction.title,
-        price: auction.price,
-        imageUrl: auction.imageUrl,
-        imageAlt: auction.imageAlt,
-        category: auction.category
-    });
-    summary.textContent = `${auction.title} foi adicionado ao carrinho.`;
-}
-
 async function loadCatalog() {
-    renderState(content, 'loading', 'Carregando catálogo...');
+    renderState(content, 'loading', t('Carregando catálogo...'));
     try {
         auctions = normalizeCollection(await getAuctions());
         renderCatalog();
     } catch (error) {
-        renderState(content, 'error', error.message);
-        summary.textContent = '';
+        renderState(content, 'error', getUserErrorMessage(
+            error,
+            t('Não conseguimos carregar o catálogo agora. Tente novamente em instantes.')
+        ));
+        status.textContent = '';
     }
 }
 
 form.addEventListener('input', debounce(renderCatalog));
-form.addEventListener('change', renderCatalog);
+form.addEventListener('change', (event) => {
+    if (event.target === categorySelect) syncBrandField(categorySelect.value, brandField, brandInput);
+    renderCatalog();
+});
+form.addEventListener('reset', () => window.setTimeout(() => {
+    syncBrandField(categorySelect.value, brandField, brandInput);
+    renderCatalog();
+}));
 content.addEventListener('click', (event) => {
     const favoriteButton = event.target.closest('[data-action="favorite"]');
-    const buyButton = event.target.closest('[data-action="buy-now"]');
     if (favoriteButton) toggleFavorite(favoriteButton);
-    if (buyButton) addImmediateItem(buyButton.dataset.auctionId);
 });
 
+syncBrandField(categorySelect.value, brandField, brandInput);
 loadCatalog();

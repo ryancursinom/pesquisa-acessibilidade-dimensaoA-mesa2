@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Midas, plataforma de leilões online e compra imediata de itens selecionados.">
+    <meta name="description" content="Midas, plataforma de leilões online com compra imediata opcional e recursos de acessibilidade.">
+    <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
     <title>Midas - O toque de ouro em leilões</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/home.css">
@@ -29,17 +30,17 @@
         </section>
 
         <section class="kpis" aria-label="Destaques da plataforma">
-            <div class="container kpis__grid">
-                <article class="kpi-item"><div class="kpi-icon" aria-hidden="true">👥</div><div class="kpi-info"><strong>Clientes a vapor</strong><span>Comunidade ativa de compradores</span></div></article>
-                <article class="kpi-item"><div class="kpi-icon" aria-hidden="true">↗</div><div class="kpi-info"><strong>Vendas constantes</strong><span>Itens de diferentes faixas de valor</span></div></article>
-                <article class="kpi-item"><div class="kpi-icon" aria-hidden="true">◷</div><div class="kpi-info"><strong>Suporte ao vivo</strong><span>Fluxos com feedback claro ao usuário</span></div></article>
-                <article class="kpi-item"><div class="kpi-icon" aria-hidden="true">⚖</div><div class="kpi-info"><strong>Leilões para todos</strong><span>Acessibilidade como parte do produto</span></div></article>
-            </div>
+            <ul class="container kpis__grid">
+                <li class="kpi-item"><div class="kpi-icon" data-icon="users" aria-hidden="true"></div><div class="kpi-info"><strong>Clientes a vapor</strong><span>Comunidade ativa de compradores</span></div></li>
+                <li class="kpi-item"><div class="kpi-icon" data-icon="trendingUp" aria-hidden="true"></div><div class="kpi-info"><strong>Vendas constantes</strong><span>Itens de diferentes faixas de valor</span></div></li>
+                <li class="kpi-item"><div class="kpi-icon" data-icon="clock" aria-hidden="true"></div><div class="kpi-info"><strong>Suporte ao vivo</strong><span>Fluxos com feedback claro ao usuário</span></div></li>
+                <li class="kpi-item"><div class="kpi-icon" data-icon="banknote" aria-hidden="true"></div><div class="kpi-info"><strong>Leilões para todos</strong><span>Acessibilidade como parte do produto</span></div></li>
+            </ul>
         </section>
 
-        <section class="auctions-section" id="maiores-leiloes" aria-labelledby="featured-title">
+        <section class="auctions-section auctions-section--featured" id="maiores-leiloes" aria-labelledby="featured-title">
             <div class="container">
-                <header class="section-header">
+                <header class="section-header section-header--featured">
                     <h2 id="featured-title">Maiores Leilões</h2>
                     <p>Itens em destaque no catálogo do Midas.</p>
                 </header>
@@ -59,17 +60,17 @@
             </div>
         </section>
 
-        <section class="auctions-section" id="acabando-breve" aria-labelledby="ending-title">
+        <section class="auctions-section auctions-section--ending" id="acabando-breve" aria-labelledby="ending-title">
             <div class="container">
                 <header class="section-header">
                     <h2 id="ending-title">Acabando em Breve</h2>
                     <p>O período destes leilões está quase acabando.</p>
                 </header>
                 <div class="carousel-wrapper">
-                    <div id="ending-grid" class="auctions-grid auctions-grid--carousel" aria-live="polite"></div>
+                    <div id="ending-grid" class="auctions-grid auctions-grid--carousel" tabindex="0" aria-label="Leilões acabando em breve" aria-live="polite"></div>
                     <div class="carousel-controls" aria-label="Controles do carrossel">
-                        <button class="carousel-control prev" type="button" aria-label="Ver itens anteriores" aria-controls="ending-grid">←</button>
-                        <button class="carousel-control next" type="button" aria-label="Ver próximos itens" aria-controls="ending-grid">→</button>
+                        <button class="carousel-control prev" type="button" aria-label="Ver leilão anterior" aria-controls="ending-grid"><span data-icon="chevronLeft" aria-hidden="true"></span></button>
+                        <button class="carousel-control next" type="button" aria-label="Ver próximo leilão" aria-controls="ending-grid"><span data-icon="chevronRight" aria-hidden="true"></span></button>
                     </div>
                 </div>
             </div>

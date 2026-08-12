@@ -29,7 +29,7 @@ export function addToCart(product) {
 }
 
 export function updateCartQuantity(id, quantity) {
-    const nextQuantity = Math.max(1, Number(quantity) || 1);
+    const nextQuantity = Math.min(20, Math.max(1, Number(quantity) || 1));
     const items = readCart().map((item) => (
         String(item.id) === String(id) ? { ...item, quantity: nextQuantity } : item
     ));

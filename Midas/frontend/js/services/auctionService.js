@@ -14,9 +14,12 @@ export function getBidHistory(id) {
 
 export function placeBid(id, amount) {
     return apiRequest(`/auctions/${encodeURIComponent(id)}/bids`, {
-        method: 'POST',
-        body: JSON.stringify({ amount })
+        method: 'POST', body: JSON.stringify({ amount })
     });
+}
+
+export function buyNowAuction(id) {
+    return apiRequest(`/auctions/${encodeURIComponent(id)}/buy-now`, { method: 'POST' });
 }
 
 export function setFavorite(id, favorite) {
@@ -30,10 +33,7 @@ export function createAuction(formData) {
 }
 
 export function updateAuction(id, formData) {
-    return apiRequest(`/auctions/${encodeURIComponent(id)}`, {
-        method: 'PUT',
-        body: formData
-    });
+    return apiRequest(`/auctions/${encodeURIComponent(id)}`, { method: 'PUT', body: formData });
 }
 
 export function getFavoriteAuctions() {

@@ -3,12 +3,12 @@ function normalize(value) {
 }
 
 function getComparablePrice(auction) {
-    return Number(auction.saleType === 'BUY_NOW' ? auction.price : auction.currentBid || 0);
+    return Number(auction.currentBid ?? auction.startingBid ?? 0);
 }
 
 function matchesText(auction, term) {
     if (!term) return true;
-    return [auction.title, auction.category, auction.brand, auction.description]
+    return [auction.id, auction.title, auction.category, auction.brand, auction.description, auction.condition]
         .some((value) => normalize(value).includes(normalize(term)));
 }
 
@@ -25,24 +25,21 @@ export function filterAuctions(auctions, filters = {}) {
         if (filters.minPrice && price < Number(filters.minPrice)) return false;
         if (filters.maxPrice && price > Number(filters.maxPrice)) return false;
         if (filters.brand && !normalize(auction.brand).includes(normalize(filters.brand))) return false;
-        if (filters.rarity && !normalize(auction.rarity).includes(normalize(filters.rarity))) return false;
-        if (filters.itemId && !normalize(auction.id).includes(normalize(filters.itemId))) return false;
-        if (filters.category && !normalize(auction.category).includes(normalize(filters.category))) return false;
-        if (filters.saleType && filters.saleType !== 'all' && auction.saleType !== filters.saleType) return false;
+        if (filters.category && filters.category !== 'all' && normalize(auction.category) !== normalize(filters.category)) return false;
         if (filters.status && filters.status !== 'all' && auction.status !== filters.status) return false;
         return matchesEnding(auction, filters.ending);
     });
 }
 
-export function sortAuctions(auctions, sort = 'ending') {
+export function sortAuctions(auctions, sort = 'relevance') {
     const items = [...auctions];
     const comparators = {
+        relevance: () => 0,
         'price-asc': (a, b) => getComparablePrice(a) - getComparablePrice(b),
         'price-desc': (a, b) => getComparablePrice(b) - getComparablePrice(a),
-        title: (a, b) => String(a.title).localeCompare(String(b.title), 'pt-BR'),
         ending: (a, b) => new Date(a.endsAt || 8640000000000000) - new Date(b.endsAt || 8640000000000000)
     };
-    return items.sort(comparators[sort] || comparators.ending);
+    return items.sort(comparators[sort] || comparators.relevance);
 }
 
 export function debounce(callback, delay = 300) {
