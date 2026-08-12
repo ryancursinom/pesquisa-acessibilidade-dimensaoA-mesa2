@@ -261,6 +261,8 @@ CREATE TABLE lance (
 -- ==============================================================================
 
 CREATE TABLE favorito (
+    id SERIAL PRIMARY KEY,
+    
     id_usuario INT NOT NULL
         REFERENCES usuario(id)
         ON DELETE CASCADE,
@@ -270,8 +272,6 @@ CREATE TABLE favorito (
         ON DELETE CASCADE,
 
     data_adicao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    PRIMARY KEY (id_usuario, id_leilao)
 );
 
 
