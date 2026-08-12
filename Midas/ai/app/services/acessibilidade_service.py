@@ -1,67 +1,61 @@
-from google import genai
-from google.genai import types
+import requests
 
-from app.config import GEMINI_API_KEY
-from app.prompts.acessibilidade_prompt import PROMPT_ACESSIBILIDADE
-
-
-client = genai.Client(
-    api_key=GEMINI_API_KEY
+from app.repositories.produto_repository import (
+    buscar_produto,
+    buscar_identidade_visual
 )
 
+from app.services.gemini_service import gerar_descricao
 
-def gerar_descricao(
-    imagem_bytes: bytes,
-    mime_type: str,
-    produto: dict,
-    identidade_visual: dict | None
-) -> str:
 
-    if identidade_visual is None:
-        identidade_visual = {}
+def obter_imagem(url: str):
 
-    contexto = f"""
-INFORMAÇÕES DO PRODUTO:
-
-Nome:
-{produto.get("nome", "Não informado")}
-
-INFORMAÇÕES VISUAIS DO BANCO:
-
-Cor primária:
-{identidade_visual.get("cor_primaria", "Não informado")}
-
-Cor secundária:
-{identidade_visual.get("cor_secundaria", "Não informado")}
-
-Descrição da paleta:
-{identidade_visual.get("descricao_paleta", "Não informado")}
-
-Formato:
-{identidade_visual.get("formato", "Não informado")}
-
-Descrição do formato:
-{identidade_visual.get("descricao_formato", "Não informado")}
-
-Descrição visual previamente cadastrada:
-{identidade_visual.get("descricao_geral", "Não informado")}
-"""
-
-    resposta = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=[
-            types.Part.from_bytes(
-                data=imagem_bytes,
-                mime_type=mime_type
-            ),
-            PROMPT_ACESSIBILIDADE,
-            contexto
-        ]
+    resposta = requests.get(
+        url,
+        timeout=15
     )
 
-    if not resposta.text:
-        raise RuntimeError(
-            "O Gemini não retornou uma descrição."
+    resposta.raise_for_status()
+
+    content_type = resposta.headers.get(
+        "Content-Type",
+        ""
+    )
+
+    if not content_type.startswith("image/"):
+        raise ValueError(
+            "A URL fornecida não aponta para uma imagem."
         )
 
-    return resposta.text.strip()
+    return resposta.content, content_type
+
+
+def gerar_descricao_produto(produto_id: int):
+
+    produto = buscar_produto(produto_id)
+
+    if not produto:
+        raise ValueError(
+            "Produto não encontrado."
+        )
+
+    identidade_visual = buscar_identidade_visual(
+        produto_id
+    )
+
+    imagem_bytes, mime_type = obter_imagem(
+        produto["imagem_url"]
+    )
+
+    descricao = gerar_descricao(
+        imagem_bytes=imagem_bytes,
+        mime_type=mime_type,
+        produto=produto,
+        identidade_visual=identidade_visual
+    )
+
+    return {
+        "produto_id": produto["id"],
+        "produto": produto["nome"],
+        "descricao": descricao
+    }
