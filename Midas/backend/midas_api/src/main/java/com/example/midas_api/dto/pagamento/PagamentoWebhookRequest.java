@@ -1,7 +1,6 @@
 package com.example.midas_api.dto.pagamento;
 
 import com.example.midas_api.entity.enums.StatusPagamento;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public record PagamentoWebhookRequest(

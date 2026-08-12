@@ -1,13 +1,7 @@
 package com.example.midas_api.entity;
 
-import com.example.midas_api.entity.enums.StatusProduto;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.Size;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-
-import java.time.LocalDateTime;
 
 // JPA
 @Entity

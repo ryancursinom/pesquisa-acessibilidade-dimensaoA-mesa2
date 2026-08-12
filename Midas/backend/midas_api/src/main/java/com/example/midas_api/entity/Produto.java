@@ -9,6 +9,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -32,9 +33,6 @@ public class Produto {
     @Column(nullable = false, length = 255)
     private String nome;
 
-    @Column(nullable = false, length = 1024)
-    private String urlImagem;
-
     private Integer anoFabricacao;
     private Integer anoLancamento;
 
@@ -46,12 +44,12 @@ public class Produto {
     private String marca;
 
     @Positive
-    private Double peso;
+    private BigDecimal peso;
 
     // Lance inicial mínimo aceito quando o produto for a leilão.
     @Column(nullable = false)
     @Positive
-    private Double lanceMinimo;
+    private BigDecimal lanceMinimo;
 
     @Column(nullable = false, columnDefinition = "produto_status")
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)

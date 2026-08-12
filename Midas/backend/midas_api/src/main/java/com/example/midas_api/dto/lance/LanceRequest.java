@@ -1,14 +1,10 @@
 package com.example.midas_api.dto.lance;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
 public record LanceRequest(
-        @NotNull
+        @Positive(message = "O valor do lance deve ser maior que zero.")
         double valor,
-
-        @NotNull
         Integer leilaoId,
-
-        @NotNull
         Integer usuarioId
 ) {}

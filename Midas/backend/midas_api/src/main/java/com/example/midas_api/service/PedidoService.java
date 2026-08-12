@@ -1,6 +1,7 @@
 package com.example.midas_api.service;
 
-import com.example.midas_api.dto.pedido.*;
+import com.example.midas_api.dto.pedido.PedidoItemResponse;
+import com.example.midas_api.dto.pedido.PedidoResponse;
 import com.example.midas_api.entity.Pedido;
 import com.example.midas_api.exception.ResourceNotFoundException;
 import com.example.midas_api.mapper.PedidoMapper;
@@ -40,8 +41,7 @@ public class PedidoService {
     }
 
     private PedidoResponse toResponse(Pedido pedido) {
-        List<PedidoItemResponse> itens = pedidoItemRepository.findAll().stream()
-                .filter(i -> i.getPedido().getId().equals(pedido.getId()))
+        List<PedidoItemResponse> itens = pedidoItemRepository.findByPedido_Id(pedido.getId()).stream()
                 .map(pedidoMapper::toItemResponse)
                 .toList();
 

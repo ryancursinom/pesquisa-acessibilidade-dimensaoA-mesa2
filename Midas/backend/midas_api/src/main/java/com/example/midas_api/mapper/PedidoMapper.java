@@ -1,6 +1,7 @@
 package com.example.midas_api.mapper;
 
-import com.example.midas_api.dto.pedido.*;
+import com.example.midas_api.dto.pedido.PedidoItemResponse;
+import com.example.midas_api.dto.pedido.PedidoResponse;
 import com.example.midas_api.entity.Pedido;
 import com.example.midas_api.entity.PedidoItem;
 import org.mapstruct.Mapper;

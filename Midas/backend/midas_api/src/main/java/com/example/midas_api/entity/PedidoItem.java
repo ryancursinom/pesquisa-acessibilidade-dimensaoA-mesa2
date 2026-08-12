@@ -1,19 +1,13 @@
 package com.example.midas_api.entity;
 
-import com.example.midas_api.entity.enums.StatusProduto;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.Size;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
 
-import java.time.LocalDateTime;
+import java.math.BigDecimal;
 
-// JPA
 @Entity
 @Table(name = "pedido_item")
-
-// Lombok
 @Getter
 @Setter
 @NoArgsConstructor
@@ -33,21 +27,21 @@ public class PedidoItem {
 
     @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_produto_loja", nullable = false)
+    @JoinColumn(name = "id_produto_loja")
     private ProdutoLoja produtoLoja;
 
     @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_leilao", nullable = false)
+    @JoinColumn(name = "id_leilao")
     private Leilao leilao;
 
     @Column(nullable = false)
     @Positive
     private Integer quantidade;
 
-    @Column(name = "preco_unitario", nullable = false, precision = 12, scale = 2)
-    private Double precoUnitario;
+    @Column(name = "preco_unitario", nullable = false)
+    private BigDecimal precoUnitario;
 
-    @Column(nullable = false, precision = 12, scale = 2)
-    private Double subtotal;
+    @Column(nullable = false)
+    private BigDecimal subtotal;
 }

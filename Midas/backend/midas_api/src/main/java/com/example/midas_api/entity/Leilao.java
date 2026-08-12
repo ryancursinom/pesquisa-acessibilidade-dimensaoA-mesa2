@@ -8,6 +8,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -44,8 +45,8 @@ public class Leilao {
     @Enumerated(EnumType.STRING)
     private TipoCompra tipoCompra;
 
-    @Column(name = "valor_compra_imediata", precision = 12, scale = 2)
-    private Double valorCompraImediata;
+    @Column(name = "valor_compra_imediata")
+    private BigDecimal valorCompraImediata;
 
     @Column(nullable = false)
     @CreationTimestamp

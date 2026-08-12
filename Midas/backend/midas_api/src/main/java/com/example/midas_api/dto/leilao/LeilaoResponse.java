@@ -1,8 +1,9 @@
 package com.example.midas_api.dto.leilao;
 
-import com.example.midas_api.dto.produto.ProdutoResumoResponse;
+import com.example.midas_api.dto.produto.ProdutoResponse;
 import com.example.midas_api.entity.enums.StatusLeilao;
 import com.example.midas_api.entity.enums.TipoCompra;
+
 import java.time.LocalDateTime;
 
 public record LeilaoResponse(
@@ -13,5 +14,7 @@ public record LeilaoResponse(
         TipoCompra tipoCompra,
         Double valorCompraImediata,
         LocalDateTime criadoEm,
-        ProdutoResumoResponse produto
+        Double lanceAtual,
+        Integer quantidadeLances,
+        ProdutoResponse produto
 ) {}

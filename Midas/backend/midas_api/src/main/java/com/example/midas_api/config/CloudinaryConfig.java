@@ -3,6 +3,7 @@ package com.example.midas_api.config;
 import com.cloudinary.Cloudinary;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,15 +12,16 @@ import java.util.Map;
 public class CloudinaryConfig {
 
     @Bean
-    public Cloudinary cloudinary() {
-        String cloudinaryUrl = System.getenv("CLOUDINARY_URL");
-        if (cloudinaryUrl != null && !cloudinaryUrl.isBlank()) {
-            return new Cloudinary(cloudinaryUrl);
+    public Cloudinary cloudinary(Environment environment) {
+        String url = environment.getProperty("CLOUDINARY_URL", "").trim();
+        if (!url.isEmpty()) {
+            return new Cloudinary(url);
         }
+
         Map<String, String> config = new HashMap<>();
-        config.put("cloud_name", System.getenv("CLOUDINARY_CLOUD_NAME"));
-        config.put("api_key", System.getenv("CLOUDINARY_API_KEY"));
-        config.put("api_secret", System.getenv("CLOUDINARY_API_SECRET"));
+        config.put("cloud_name", environment.getProperty("CLOUDINARY_CLOUD_NAME", ""));
+        config.put("api_key", environment.getProperty("CLOUDINARY_API_KEY", ""));
+        config.put("api_secret", environment.getProperty("CLOUDINARY_API_SECRET", ""));
         return new Cloudinary(config);
     }
 }

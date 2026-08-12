@@ -1,6 +1,8 @@
 package com.example.midas_api.service;
 
-import com.example.midas_api.dto.leilao.*;
+import com.example.midas_api.dto.leilao.AtualizarLeilaoRequest;
+import com.example.midas_api.dto.leilao.LeilaoRequest;
+import com.example.midas_api.dto.leilao.LeilaoResponse;
 import com.example.midas_api.entity.Leilao;
 import com.example.midas_api.entity.Produto;
 import com.example.midas_api.entity.enums.StatusLeilao;
@@ -17,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -50,22 +53,23 @@ public class LeilaoService {
 
         Leilao leilao = leilaoMapper.toEntity(dto);
         leilao.setProduto(produto);
-        leilao.setStatus(StatusLeilao.AGUARDANDO);
+        leilao.setStatus(dto.dataInicio().isAfter(LocalDateTime.now()) ? StatusLeilao.AGUARDANDO : StatusLeilao.ATIVO);
         leilao.setTipoCompra(tipoCompra);
         produto.setStatus(StatusProduto.EM_LEILAO);
 
         return leilaoMapper.toResponse(leilaoRepository.save(leilao));
     }
 
-    @Transactional(readOnly = true)
     public List<LeilaoResponse> listar(StatusLeilao status) {
-        return (status == null ? leilaoRepository.findAll() : leilaoRepository.findByStatus(status))
-                .stream().map(leilaoMapper::toResponse).toList();
+        List<Leilao> leiloes = status == null ? leilaoRepository.findAll() : leilaoRepository.findByStatus(status);
+        leiloes.forEach(this::sincronizarStatusTemporal);
+        return leiloes.stream().map(leilaoMapper::toResponse).toList();
     }
 
-    @Transactional(readOnly = true)
     public LeilaoResponse buscarPorId(Integer id) {
-        return leilaoMapper.toResponse(buscarEntidadePorId(id));
+        Leilao leilao = buscarEntidadePorId(id);
+        sincronizarStatusTemporal(leilao);
+        return leilaoMapper.toResponse(leilao);
     }
 
     public LeilaoResponse atualizar(Integer id, AtualizarLeilaoRequest dto, Integer usuarioId) {
@@ -79,16 +83,18 @@ public class LeilaoService {
         LocalDateTime fim = dto.dataFim() != null ? dto.dataFim() : leilao.getDataFim();
         TipoCompra tipo = dto.tipoCompra() != null ? dto.tipoCompra() : leilao.getTipoCompra();
         Double compraImediata = dto.valorCompraImediata() != null
-                ? dto.valorCompraImediata() : leilao.getValorCompraImediata();
+                ? dto.valorCompraImediata()
+                : (leilao.getValorCompraImediata() == null ? null : leilao.getValorCompraImediata().doubleValue());
 
         validarDatas(inicio, fim);
         validarCompraImediata(tipo, compraImediata);
 
         leilaoMapper.toUpdate(dto, leilao);
         leilao.setTipoCompra(tipo);
-        leilao.setValorCompraImediata(compraImediata);
+        leilao.setValorCompraImediata(compraImediata == null ? null : BigDecimal.valueOf(compraImediata));
         leilao.setDataInicio(inicio);
         leilao.setDataFim(fim);
+        sincronizarStatusTemporal(leilao);
 
         return leilaoMapper.toResponse(leilao);
     }
@@ -180,4 +186,14 @@ public class LeilaoService {
             throw new BusinessException("Um leilão sem compra imediata não deve possuir valor de compra imediata.");
         }
     }
+    private void sincronizarStatusTemporal(Leilao leilao) {
+        LocalDateTime agora = LocalDateTime.now();
+        if (leilao.getStatus() == StatusLeilao.AGUARDANDO && !agora.isBefore(leilao.getDataInicio())) {
+            leilao.setStatus(StatusLeilao.ATIVO);
+        }
+        if (leilao.getStatus() == StatusLeilao.ATIVO && !agora.isBefore(leilao.getDataFim())) {
+            leilao.setStatus(StatusLeilao.FINALIZADO);
+        }
+    }
+
 }

@@ -1,9 +1,10 @@
 package com.example.midas_api.mapper;
 
-import com.example.midas_api.dto.carrinho.*;
+import com.example.midas_api.dto.carrinho.CarrinhoItemResponse;
+import com.example.midas_api.dto.carrinho.CarrinhoResponse;
+import com.example.midas_api.dto.produtoLoja.ProdutoLojaResponse;
 import com.example.midas_api.entity.Carrinho;
 import com.example.midas_api.entity.CarrinhoItem;
-import com.example.midas_api.dto.produtoLoja.ProdutoLojaResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

@@ -1,13 +1,14 @@
 package com.example.midas_api.dto.pedido;
 
-import com.example.midas_api.entity.enums.StatusPedido;
+import com.example.midas_api.entity.enums.PedidoStatus;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
 public record PedidoResponse(
         Integer id,
         Integer usuarioId,
-        StatusPedido status,
+        PedidoStatus status,
         Double valorTotal,
         LocalDateTime criadoEm,
         LocalDateTime atualizadoEm,

@@ -1,8 +1,8 @@
 package com.example.midas_api.dto.usuario;
 
-public record AtualizarUsuarioRequest(
-        String nome,
+import jakarta.validation.constraints.Size;
 
-        String username
-)
-{}
+public record AtualizarUsuarioRequest(
+        @Size(max = 255) String nome,
+        @Size(max = 50) String username
+) {}

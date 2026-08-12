@@ -7,8 +7,6 @@ public record ProdutoResumoResponse(
 
         String nome,
 
-        String urlImagem,
-
         Double lanceMinimo,
 
         StatusProduto status

@@ -3,6 +3,8 @@ package com.example.midas_api.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -34,10 +36,6 @@ public class Usuario {
     @Column(nullable = false)
     @CreationTimestamp
     private LocalDateTime dataCadastro;
-
-    @Column(name = "avaliacao_media", precision = 3, scale = 2)
-    @Builder.Default
-    private Double avaliacaoMedia = 0.0;
 
     @OneToMany(mappedBy = "usuario")
     private List<Telefone> telefones;

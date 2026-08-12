@@ -1,14 +1,10 @@
 package com.example.midas_api.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Positive;
 import lombok.*;
 
-// JPA
 @Entity
 @Table(name = "produto_imagem")
-
-// Lombok
 @Getter
 @Setter
 @NoArgsConstructor
@@ -16,7 +12,6 @@ import lombok.*;
 @Builder
 @ToString
 public class ProdutoImagem {
-    // Atributos
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -30,8 +25,4 @@ public class ProdutoImagem {
 
     @Column(name = "ordem")
     private Integer ordem;
-
-    @Column(name = "principal")
-    @Builder.Default
-    private Boolean principal = false;
 }

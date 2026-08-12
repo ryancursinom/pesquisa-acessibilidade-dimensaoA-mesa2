@@ -3,7 +3,6 @@ package com.example.midas_api.entity;
 import com.example.midas_api.entity.enums.TipoTelefone;
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.boot.context.properties.bind.DefaultValue;
 
 // JPA
 @Entity

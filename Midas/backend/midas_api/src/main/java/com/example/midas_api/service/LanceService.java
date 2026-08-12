@@ -1,11 +1,5 @@
 package com.example.midas_api.service;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.example.midas_api.dto.lance.LanceRequest;
 import com.example.midas_api.dto.lance.LanceResponse;
 import com.example.midas_api.entity.Lance;
@@ -18,8 +12,13 @@ import com.example.midas_api.mapper.LanceMapper;
 import com.example.midas_api.repository.LanceRepository;
 import com.example.midas_api.repository.LeilaoRepository;
 import com.example.midas_api.repository.UsuarioRepository;
-
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -42,6 +41,14 @@ public class LanceService {
         Leilao leilao = leilaoRepository.findById(dto.leilaoId())
                 .orElseThrow(() -> new ResourceNotFoundException("Leilão", dto.leilaoId()));
 
+        LocalDateTime agora = LocalDateTime.now();
+        if (leilao.getStatus() == StatusLeilao.AGUARDANDO && !agora.isBefore(leilao.getDataInicio())) {
+            leilao.setStatus(StatusLeilao.ATIVO);
+        }
+        if (leilao.getStatus() == StatusLeilao.ATIVO && !agora.isBefore(leilao.getDataFim())) {
+            leilao.setStatus(StatusLeilao.FINALIZADO);
+        }
+
         if (leilao.getStatus() != StatusLeilao.ATIVO) {
             throw new BusinessException(
                     "Não é possível registrar lance em um leilão com status " + leilao.getStatus() + ".");
@@ -57,20 +64,32 @@ public class LanceService {
             throw new BusinessException("Você não pode dar lance no seu próprio produto.");
         }
 
-        double valorMinimo = lanceRepository.findTopByLeilao_IdOrderByValorDesc(leilao.getId())
+        BigDecimal valorMinimo = lanceRepository.findTopByLeilao_IdOrderByValorDesc(leilao.getId())
                 .map(Lance::getValor)
                 .orElse(leilao.getProduto().getLanceMinimo());
 
-        if (dto.valor() <= valorMinimo) {
+        BigDecimal valorLance = BigDecimal.valueOf(dto.valor());
+        if (valorLance.compareTo(valorMinimo) <= 0) {
             throw new BusinessException(
                     "O valor do lance deve ser maior que o lance atual (R$ %.2f).".formatted(valorMinimo));
         }
 
         Lance lance = lanceMapper.toEntity(dto);
+        lance.setValor(valorLance);
         lance.setLeilao(leilao);
         lance.setUsuario(usuario);
 
         return lanceMapper.toResponse(lanceRepository.save(lance));
+    }
+
+    @Transactional(readOnly = true)
+    public List<LanceResponse> listarPorUsuario(Integer usuarioId) {
+        if (!usuarioRepository.existsById(usuarioId)) {
+            throw new ResourceNotFoundException("Usuário", usuarioId);
+        }
+        return lanceRepository.findByUsuario_Id(usuarioId).stream()
+                .map(lanceMapper::toResponse)
+                .toList();
     }
 
     @Transactional(readOnly = true)

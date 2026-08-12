@@ -6,11 +6,8 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
-// JPA
 @Entity
 @Table(name = "favorito")
-
-// Lombok
 @Getter
 @Setter
 @NoArgsConstructor
@@ -19,22 +16,21 @@ import java.time.LocalDateTime;
 @ToString
 public class Favorito {
 
-    @EmbeddedId
-    private FavoritoId id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
 
     @ToString.Exclude
-    @ManyToOne
-    @MapsId("usuarioId")
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_usuario", nullable = false)
     private Usuario usuario;
 
     @ToString.Exclude
-    @ManyToOne
-    @MapsId("leilaoId")
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_leilao", nullable = false)
     private Leilao leilao;
 
-    @Column(nullable = false)
+    @Column(name = "data_adicao")
     @CreationTimestamp
     private LocalDateTime dataAdicao;
 }

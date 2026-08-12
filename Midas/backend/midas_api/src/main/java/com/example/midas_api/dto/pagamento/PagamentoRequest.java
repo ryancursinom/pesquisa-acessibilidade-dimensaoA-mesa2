@@ -5,7 +5,5 @@ import jakarta.validation.constraints.NotNull;
 
 public record PagamentoRequest(
         @NotNull MeioPagamento meioPagamento,
-        Double valorTotal,
-        @NotNull Integer leilaoId,
-        Integer usuarioId
+        @NotNull Integer leilaoId
 ) {}

@@ -7,8 +7,6 @@ public record UsuarioResponse(
 
         String username,
 
-        String email,
-
-        Double avaliacaoMedia
+        String email
 )
 {}

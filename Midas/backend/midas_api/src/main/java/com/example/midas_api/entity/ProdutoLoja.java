@@ -1,8 +1,9 @@
 package com.example.midas_api.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Positive;
 import lombok.*;
+
+import java.math.BigDecimal;
 
 // JPA
 @Entity
@@ -24,8 +25,8 @@ public class ProdutoLoja {
     @Column(nullable = false, length = 50, unique = true)
     private String nome;
 
-    @Column(nullable = false, precision = 12, scale = 2)
-    private Double preco;
+    @Column(nullable = false)
+    private BigDecimal preco;
 
     @Column(name = "descricao", nullable = false, columnDefinition = "TEXT")
     private String descricao;

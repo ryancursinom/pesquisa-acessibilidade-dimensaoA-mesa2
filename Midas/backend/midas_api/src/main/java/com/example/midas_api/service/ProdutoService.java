@@ -1,7 +1,11 @@
 package com.example.midas_api.service;
 
-import com.example.midas_api.dto.produto.*;
-import com.example.midas_api.entity.*;
+import com.example.midas_api.dto.produto.AtualizarProdutoRequest;
+import com.example.midas_api.dto.produto.ProdutoRequest;
+import com.example.midas_api.dto.produto.ProdutoResponse;
+import com.example.midas_api.entity.Produto;
+import com.example.midas_api.entity.ProdutoImagem;
+import com.example.midas_api.entity.Usuario;
 import com.example.midas_api.entity.enums.StatusProduto;
 import com.example.midas_api.exception.BusinessException;
 import com.example.midas_api.exception.ResourceNotFoundException;
@@ -10,6 +14,7 @@ import com.example.midas_api.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +30,8 @@ public class ProdutoService {
     private final EstadoFisicoRepository estadoFisicoRepository;
     private final RaridadeRepository raridadeRepository;
     private final LeilaoRepository leilaoRepository;
+    private final ProdutoImagemRepository produtoImagemRepository;
+    private final CloudinaryService cloudinaryService;
     private final ProdutoMapper produtoMapper;
 
     public ProdutoResponse criar(ProdutoRequest dto, Integer usuarioId) {
@@ -41,17 +48,27 @@ public class ProdutoService {
                 .orElseThrow(() -> new ResourceNotFoundException("Raridade", dto.raridadeId())));
         produto.setStatus(StatusProduto.DISPONIVEL);
 
-        if (dto.urlImagem() != null && !dto.urlImagem().isBlank()) {
-            ProdutoImagem imagem = ProdutoImagem.builder()
-                    .url(dto.urlImagem())
-                    .ordem(0)
-                    .principal(true)
-                    .produto(produto)
-                    .build();
-            produto.setImagens(new ArrayList<>(List.of(imagem)));
-        }
-
         return produtoMapper.toResponse(produtoRepository.save(produto));
+    }
+
+    public ProdutoResponse adicionarImagem(Integer produtoId, MultipartFile file, Integer usuarioId) {
+        Produto produto = buscarEntidadePorId(produtoId);
+        validarPosse(produto, usuarioId);
+        validarArquivoImagem(file);
+
+        String url = cloudinaryService.uploadImage(file);
+        if (produto.getImagens() == null) produto.setImagens(new ArrayList<>());
+
+        ProdutoImagem imagem = ProdutoImagem.builder()
+                .produto(produto)
+                .url(url)
+                .ordem(produto.getImagens().size())
+                .build();
+
+        produtoImagemRepository.save(imagem);
+        produto.getImagens().add(imagem);
+
+        return produtoMapper.toResponse(produto);
     }
 
     @Transactional(readOnly = true)
@@ -76,7 +93,12 @@ public class ProdutoService {
         validarPosse(produto, usuarioId);
 
         if (produto.getStatus() == StatusProduto.EM_LEILAO) {
-            throw new BusinessException("Não é possível atualizar um produto que já está em leilão.");
+            boolean aguardando = leilaoRepository.findByProduto_Id(id)
+                    .map(leilao -> leilao.getStatus() == com.example.midas_api.entity.enums.StatusLeilao.AGUARDANDO)
+                    .orElse(false);
+            if (!aguardando) {
+                throw new BusinessException("Só é possível editar o produto antes do início do leilão.");
+            }
         }
 
         produtoMapper.toUpdate(dto, produto);
@@ -94,20 +116,8 @@ public class ProdutoService {
                     .orElseThrow(() -> new ResourceNotFoundException("Raridade", dto.raridade())));
         }
 
-        if (dto.imagem() != null && !dto.imagem().isBlank()) {
-            produto.setUrlImagem(dto.imagem());
-            ProdutoImagem imagem = ProdutoImagem.builder()
-                    .url(dto.imagem())
-                    .ordem(produto.getImagens() == null ? 0 : produto.getImagens().size())
-                    .principal(produto.getImagens() == null || produto.getImagens().isEmpty())
-                    .produto(produto)
-                    .build();
 
-            if (produto.getImagens() == null) produto.setImagens(new ArrayList<>());
-            produto.getImagens().add(imagem);
-        }
-
-        return produtoMapper.toResponse(produto);
+        return produtoMapper.toResponse(produtoRepository.save(produto));
     }
 
     public void deletar(Integer id, Integer usuarioId) {
@@ -132,4 +142,17 @@ public class ProdutoService {
                     org.springframework.http.HttpStatus.FORBIDDEN);
         }
     }
+    private void validarArquivoImagem(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new BusinessException("Selecione uma imagem para enviar.");
+        }
+        String tipo = file.getContentType();
+        if (tipo == null || !tipo.startsWith("image/")) {
+            throw new BusinessException("O arquivo enviado precisa ser uma imagem.");
+        }
+        if (file.getSize() > 5L * 1024 * 1024) {
+            throw new BusinessException("A imagem deve ter no máximo 5 MB.");
+        }
+    }
+
 }

@@ -1,10 +1,10 @@
 package com.example.midas_api.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Positive;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 // JPA
@@ -25,8 +25,7 @@ public class Lance {
     private Integer id;
 
     @Column(nullable = false)
-    @Builder.Default
-    private Double valor = 0.0;
+    private BigDecimal valor;
 
     @Column(nullable = false)
     @CreationTimestamp

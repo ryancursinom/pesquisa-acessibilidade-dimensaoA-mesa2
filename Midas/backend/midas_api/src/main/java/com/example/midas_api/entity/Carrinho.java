@@ -1,17 +1,13 @@
 package com.example.midas_api.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Positive;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-// JPA
 @Entity
-@Table(name = "favorito")
-
-// Lombok
+@Table(name = "carrinho")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -30,11 +26,10 @@ public class Carrinho {
     private Usuario usuario;
 
     @Column(name = "qtd_itens")
-    private Integer qtdItem;
+    private Integer qtdItens;
 
-    @Column(name = "total", precision = 10, scale = 2)
-    @Builder.Default
-    private Double total = 0.0;
+    @Column(name = "total")
+    private BigDecimal total;
 
     @Column(name = "criado_em")
     private LocalDateTime criadoEm;

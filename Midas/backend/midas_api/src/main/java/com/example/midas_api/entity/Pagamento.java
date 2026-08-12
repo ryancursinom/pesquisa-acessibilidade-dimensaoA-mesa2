@@ -8,6 +8,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 // JPA
@@ -43,8 +44,8 @@ public class Pagamento {
     @Column(name = "meio_pagamento", nullable = false, columnDefinition = "tipo_pagamento")
     private MeioPagamento meioPagamento;
 
-    @Column(name = "valor_total", nullable = false, precision = 12, scale = 2)
-    private Double valorTotal;
+    @Column(name = "valor_total", nullable = false)
+    private BigDecimal valorTotal;
 
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Enumerated(EnumType.STRING)
