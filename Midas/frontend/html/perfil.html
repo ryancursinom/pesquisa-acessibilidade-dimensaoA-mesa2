@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="../css/perfil.css">
 </head>
-<body class="dark-page profile-page" data-root=".." data-page="perfil">
+<body class="dark-page profile-page" data-root=".." data-page="perfil" data-private-page>
     <a class="skip-link" href="#conteudo-principal">Pular para o conteúdo principal</a>
     <header class="navbar" data-site-header></header>
 
@@ -48,6 +48,7 @@
                             <form id="profile-form" class="profile-form" novalidate>
                                 <div class="form-field"><label for="profile-name">Nome</label><input id="profile-name" name="name" type="text" autocomplete="name" required aria-describedby="profile-name-error"><span id="profile-name-error" class="field-error" aria-live="polite"></span></div>
                                 <div class="form-field"><label for="profile-email">E-mail</label><input id="profile-email" name="email" type="email" autocomplete="email" required aria-describedby="profile-email-error"><span id="profile-email-error" class="field-error" aria-live="polite"></span></div>
+                                <div class="form-field"><label for="profile-phone">Telefone</label><input id="profile-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" maxlength="15" required aria-describedby="profile-phone-error"><span id="profile-phone-error" class="field-error" aria-live="polite"></span></div>
                                 <div class="form-field"><label for="profile-city">Cidade</label><input id="profile-city" name="city" type="text" autocomplete="address-level2" aria-describedby="profile-city-error"><span id="profile-city-error" class="field-error" aria-live="polite"></span></div>
                                 <div class="form-field"><label for="profile-country">País</label><input id="profile-country" name="country" type="text" autocomplete="country-name" aria-describedby="profile-country-error"><span id="profile-country-error" class="field-error" aria-live="polite"></span></div>
                                 <div class="form-actions"><button class="btn-primary" type="submit">Salvar alterações</button></div>

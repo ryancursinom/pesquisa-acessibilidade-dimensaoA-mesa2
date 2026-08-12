@@ -1,13 +1,14 @@
-import { createAuctionCard } from '../components/auctionCard.js';
-import { debounce, filterAuctions, sortAuctions } from '../components/auctionFilters.js';
-import { syncBrandField } from '../components/catalogConfig.js';
-import { clearElement } from '../components/dom.js';
-import { getUserErrorMessage } from '../components/userError.js';
-import { renderState } from '../components/statusMessage.js';
-import { getCreatedAuctions, getFavoriteAuctions, getMyBidAuctions, setFavorite } from '../services/auctionService.js';
-import { normalizeCollection } from '../services/api.js';
-import { t } from '../services/i18n.js';
-import { isAuctionClosed } from '../components/auctionStatus.js';
+import { criarCardLeilao } from '../components/auctionCard.js';
+import { adiarExecucao, filtrarLeiloes, ordenarLeiloes } from '../components/auctionFilters.js';
+import { sincronizarCampoMarca } from '../components/catalogConfig.js';
+import { limparElemento } from '../components/dom.js';
+import { obterMensagemErroUsuario } from '../components/userError.js';
+import { renderizarEstado } from '../components/statusMessage.js';
+import { obterLeiloesCriados, obterLeiloesFavoritos, obterLeiloesComMeusLances, definirFavorito } from '../services/auctionService.js';
+import { normalizarColecao } from '../services/api.js';
+import { traduzir } from '../services/i18n.js';
+import { verificarLeilaoEncerrado } from '../components/auctionStatus.js';
+import { exigirAutenticacao } from '../components/privatePageGuard.js';
 
 const form = document.getElementById('my-auctions-filter-form');
 const grid = document.getElementById('my-auctions-grid');
@@ -20,37 +21,38 @@ const brandField = document.getElementById('my-brand-field');
 const brandInput = document.getElementById('my-brand');
 const requestedTab = new URLSearchParams(window.location.search).get('aba') || 'favoritos';
 let auctions = [];
+const canInitializePage = exigirAutenticacao();
 
 const tabConfig = {
     favoritos: {
         tabId: 'tab-favorites', title: 'Leilões Favoritados',
-        description: 'Aqui você acompanha todos os itens que marcou como favoritos.', loader: getFavoriteAuctions
+        description: 'Aqui você acompanha todos os itens que marcou como favoritos.', loader: obterLeiloesFavoritos
     },
     criados: {
         tabId: 'tab-created', title: 'Meus Leilões',
-        description: 'Aqui você acompanha os leilões que publicou, abertos ou encerrados.', loader: getCreatedAuctions
+        description: 'Aqui você acompanha os leilões que publicou, abertos ou encerrados.', loader: obterLeiloesCriados
     },
     lances: {
         tabId: 'tab-bids', title: 'Leilões com Seus Lances',
-        description: 'Aqui você acompanha os leilões em que já participou com algum lance.', loader: getMyBidAuctions
+        description: 'Aqui você acompanha os leilões em que já participou com algum lance.', loader: obterLeiloesComMeusLances
     }
 };
 
 const currentTab = tabConfig[requestedTab] ? requestedTab : 'favoritos';
 
-function getActiveConfig() {
+function obterConfiguracaoAtiva() {
     return tabConfig[currentTab] || tabConfig.favoritos;
 }
 
-function markActiveTab() {
-    const config = getActiveConfig();
+function marcarAbaAtiva() {
+    const config = obterConfiguracaoAtiva();
     document.getElementById(config.tabId).setAttribute('aria-current', 'page');
-    title.textContent = t(config.title);
-    description.textContent = t(config.description);
+    title.textContent = traduzir(config.title);
+    description.textContent = traduzir(config.description);
     createButton.hidden = currentTab !== 'criados';
 }
 
-function getFilters() {
+function obterFiltros() {
     const data = new FormData(form);
     return {
         minPrice: data.get('minPrice'), maxPrice: data.get('maxPrice'), ending: data.get('ending'),
@@ -58,77 +60,78 @@ function getFilters() {
     };
 }
 
-function getCardOptions(auction) {
+function obterOpcoesCard(auction) {
     if (currentTab === 'favoritos') return { showFavorite: true };
     if (currentTab === 'criados') {
         return {
-            showEdit: true, actionLabel: t('Ver Lances'),
-            actionHref: `detalhes-leilao.html?id=${encodeURIComponent(auction.id)}&owner=1`
+            showEdit: true, actionLabel: traduzir('Ver Lances'),
+            actionHref: `detalhes-leilao.html?id=${encodeURIComponent(auction.id)}`
         };
     }
-    if (isAuctionClosed(auction.status) && auction.canCheckout) {
+    if (verificarLeilaoEncerrado(auction.status) && auction.canCheckout) {
         return {
-            actionLabel: t('Finalizar compra'),
+            actionLabel: traduzir('Finalizar compra'),
             actionHref: `checkout.html?auctionId=${encodeURIComponent(auction.id)}`
         };
     }
     return {
-        actionLabel: t(isAuctionClosed(auction.status) ? 'Ver resultado' : 'Ver leilão'),
+        actionLabel: traduzir(verificarLeilaoEncerrado(auction.status) ? 'Ver resultado' : 'Ver leilão'),
         actionHref: `detalhes-leilao.html?id=${encodeURIComponent(auction.id)}`
     };
 }
 
-function renderResults() {
-    const filtered = sortAuctions(filterAuctions(auctions, getFilters()), 'ending');
-    clearElement(grid);
-    count.textContent = t('Itens nesta aba: {count}', { count: filtered.length });
+function renderizarResultados() {
+    const filtered = ordenarLeiloes(filtrarLeiloes(auctions, obterFiltros()), 'ending');
+    limparElemento(grid);
+    count.textContent = traduzir('Itens nesta aba: {count}', { count: filtered.length });
     if (!filtered.length) {
-        renderState(grid, 'empty', t('Nenhum item corresponde aos filtros selecionados. Tente limpar alguns filtros.'));
+        renderizarEstado(grid, 'empty', traduzir('Nenhum item corresponde aos filtros selecionados. Tente limpar alguns filtros.'));
         return;
     }
-    filtered.forEach((auction) => grid.appendChild(createAuctionCard(auction, getCardOptions(auction))));
+    filtered.forEach((auction) => grid.appendChild(criarCardLeilao(auction, obterOpcoesCard(auction))));
 }
 
-async function toggleFavorite(button) {
+async function alternarFavorito(button) {
     const auction = auctions.find((item) => String(item.id) === String(button.dataset.auctionId));
     if (!auction) return;
     button.disabled = true;
     try {
-        await setFavorite(auction.id, false);
+        await definirFavorito(auction.id, false);
         auctions = auctions.filter((item) => String(item.id) !== String(auction.id));
-        renderResults();
+        renderizarResultados();
     } catch (error) {
-        count.textContent = getUserErrorMessage(error, t('Não conseguimos remover este favorito agora. Tente novamente em instantes.'));
+        count.textContent = obterMensagemErroUsuario(error, traduzir('Não conseguimos remover este favorito agora. Tente novamente em instantes.'));
     } finally {
         button.disabled = false;
     }
 }
 
-async function loadAuctions() {
-    const config = getActiveConfig();
-    markActiveTab();
-    updateBrandVisibility();
-    renderState(grid, 'loading', t('Carregando seus leilões...'));
+async function carregarLeiloes() {
+    const config = obterConfiguracaoAtiva();
+    marcarAbaAtiva();
+    renderizarEstado(grid, 'loading', traduzir('Carregando seus leilões...'));
     try {
-        auctions = normalizeCollection(await config.loader());
-        renderResults();
+        auctions = normalizarColecao(await config.loader());
+        renderizarResultados();
     } catch (error) {
-        renderState(grid, 'error', getUserErrorMessage(error, t('Não conseguimos carregar seus leilões agora. Tente novamente em instantes.')));
+        renderizarEstado(grid, 'error', obterMensagemErroUsuario(error, traduzir('Não conseguimos carregar seus leilões agora. Tente novamente em instantes.')));
         count.textContent = '';
     }
 }
 
-form.addEventListener('input', debounce(renderResults));
-form.addEventListener('change', (event) => {
-    if (event.target === categorySelect) syncBrandField(categorySelect.value, brandField, brandInput);
-    renderResults();
-});
-form.addEventListener('reset', () => window.setTimeout(() => {
-    syncBrandField(categorySelect.value, brandField, brandInput); renderResults();
-}));
-grid.addEventListener('click', (event) => {
-    const favoriteButton = event.target.closest('[data-action="favorite"]');
-    if (favoriteButton) toggleFavorite(favoriteButton);
-});
-syncBrandField(categorySelect.value, brandField, brandInput);
-loadAuctions();
+if (canInitializePage) {
+    form.addEventListener('input', adiarExecucao(renderizarResultados));
+    form.addEventListener('change', (event) => {
+        if (event.target === categorySelect) sincronizarCampoMarca(categorySelect.value, brandField, brandInput);
+        renderizarResultados();
+    });
+    form.addEventListener('reset', () => window.setTimeout(() => {
+        sincronizarCampoMarca(categorySelect.value, brandField, brandInput); renderizarResultados();
+    }));
+    grid.addEventListener('click', (event) => {
+        const favoriteButton = event.target.closest('[data-action="favorite"]');
+        if (favoriteButton) alternarFavorito(favoriteButton);
+    });
+    sincronizarCampoMarca(categorySelect.value, brandField, brandInput);
+    carregarLeiloes();
+}

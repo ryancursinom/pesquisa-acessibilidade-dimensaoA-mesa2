@@ -1,40 +1,40 @@
-import { initAccessibilityPanel } from './components/accessibilityPanel.js';
-import { initFeedbackModal } from './components/feedbackModal.js';
-import { renderStaticIcons } from './components/icons.js';
-import { initSiteChrome } from './components/siteChrome.js';
-import { initI18n } from './services/i18n.js';
-import { applySettings } from './services/settingsService.js';
+import { inicializarPainelAcessibilidade } from './components/accessibilityPanel.js';
+import { inicializarModalAvaliacao } from './components/feedbackModal.js';
+import { renderizarIconesEstaticos } from './components/icons.js';
+import { inicializarEstruturaSite } from './components/siteChrome.js';
+import { inicializarTraducao } from './services/i18n.js';
+import { aplicarConfiguracoes } from './services/settingsService.js';
 
 const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-function getInternalTarget(link) {
+function obterDestinoInterno(link) {
     const href = link.getAttribute('href');
     if (!href || href === '#' || !href.startsWith('#')) return null;
     return document.querySelector(href);
 }
 
-function focusSection(target) {
+function focarSecao(target) {
     if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1');
     target.focus({ preventScroll: true });
 }
 
-function handleInternalNavigation(event) {
+function navegarParaSecaoInterna(event) {
     const link = event.target.closest('a[href^="#"]');
     if (!link) return;
-    const target = getInternalTarget(link);
+    const target = obterDestinoInterno(link);
     if (!target) return;
 
     event.preventDefault();
     target.scrollIntoView({ behavior: reducedMotionQuery.matches ? 'auto' : 'smooth', block: 'start' });
-    focusSection(target);
+    focarSecao(target);
 }
 
-function initGlobalNavigation() {
-    document.addEventListener('click', handleInternalNavigation);
+function inicializarNavegacaoGlobal() {
+    document.addEventListener('click', navegarParaSecaoInterna);
 }
 
 
-function handleBackNavigation(event) {
+function navegarParaPaginaAnterior(event) {
     const button = event.target.closest('[data-back-button]');
     if (!button) return;
 
@@ -52,25 +52,25 @@ function handleBackNavigation(event) {
     window.location.href = fallback;
 }
 
-function initBackButtons() {
-    document.addEventListener('click', handleBackNavigation);
+function inicializarBotoesVoltar() {
+    document.addEventListener('click', navegarParaPaginaAnterior);
 }
 
-function syncSettingsAfterHistory() {
+function sincronizarConfiguracoesAposHistorico() {
     // O navegador pode restaurar uma página antiga pelo botão Voltar sem executar os módulos novamente.
-    applySettings();
+    aplicarConfiguracoes();
 }
 
-function initGlobalFeatures() {
-    applySettings();
-    initI18n();
-    initSiteChrome();
-    initAccessibilityPanel();
-    initFeedbackModal();
-    renderStaticIcons();
-    initGlobalNavigation();
-    initBackButtons();
-    window.addEventListener('pageshow', syncSettingsAfterHistory);
+function inicializarRecursosGlobais() {
+    aplicarConfiguracoes();
+    inicializarTraducao();
+    inicializarEstruturaSite();
+    inicializarPainelAcessibilidade();
+    inicializarModalAvaliacao();
+    renderizarIconesEstaticos();
+    inicializarNavegacaoGlobal();
+    inicializarBotoesVoltar();
+    window.addEventListener('pageshow', sincronizarConfiguracoesAposHistorico);
 }
 
-initGlobalFeatures();
+inicializarRecursosGlobais();

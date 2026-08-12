@@ -1,14 +1,15 @@
-import { clearElement, createElement, formatCurrency, formatDateTime } from '../components/dom.js';
-import { clearFieldError, validatePositiveNumber } from '../components/formValidation.js';
-import { closeDialog, initDialog, openDialog } from '../components/modal.js';
-import { renderState, setLiveMessage } from '../components/statusMessage.js';
-import { getUserErrorMessage } from '../components/userError.js';
-import { buyNowAuction, getAuctionById, getBidHistory, placeBid } from '../services/auctionService.js';
-import { isAuthenticated } from '../services/authService.js';
-import { getProfile } from '../services/userService.js';
-import { normalizeCollection } from '../services/api.js';
-import { t } from '../services/i18n.js';
-import { isAuctionClosed } from '../components/auctionStatus.js';
+import { limparElemento, criarElemento, formatarMoeda, formatarDataHora } from '../components/dom.js';
+import { limparErroCampo, validarNumeroPositivo } from '../components/formValidation.js';
+import { fecharDialogo, inicializarDialogo, abrirDialogo } from '../components/modal.js';
+import { renderizarEstado, definirMensagemAoVivo } from '../components/statusMessage.js';
+import { obterMensagemErroUsuario } from '../components/userError.js';
+import { formatarTelefoneBrasileiro, obterDigitosTelefone } from '../components/phone.js';
+import { comprarLeilaoAgora, obterLeilaoPorId, obterHistoricoLances, enviarLance } from '../services/auctionService.js';
+import { verificarAutenticacao } from '../services/authService.js';
+import { obterPerfil } from '../services/userService.js';
+import { normalizarColecao } from '../services/api.js';
+import { traduzir } from '../services/i18n.js';
+import { verificarLeilaoEncerrado, verificarLeilaoFinalizado } from '../components/auctionStatus.js';
 
 const params = new URLSearchParams(window.location.search);
 const auctionId = params.get('id');
@@ -29,28 +30,30 @@ const buyNowDialog = document.getElementById('buy-now-confirm-dialog');
 const buyNowMessage = document.getElementById('buy-now-confirm-message');
 const buyNowConfirmButton = document.getElementById('buy-now-confirm-button');
 const ownerReadOnlyMessage = document.getElementById('owner-read-only-message');
-const ownerModeFromQuery = params.get('owner') === '1';
+const winnerSection = document.getElementById('auction-winner-section');
+const winnerContact = document.getElementById('auction-winner-contact');
+const withoutWinnerMessage = document.getElementById('auction-without-winner');
 
 let auction = null;
 let pendingBid = null;
 let countdownTimer = null;
-let ownerView = ownerModeFromQuery;
+let ownerView = false;
 
-function setText(id, value, fallback = 'Não informado') {
+function definirTexto(id, value, fallback = 'Não informado') {
     const element = document.getElementById(id);
-    if (element) element.textContent = value || t(fallback);
+    if (element) element.textContent = value || traduzir(fallback);
 }
 
-function renderMainImage(item) {
+function renderizarImagemPrincipal(item) {
     const image = document.getElementById('details-main-image');
     const firstImage = Array.isArray(item.imageUrls) ? item.imageUrls.find(Boolean) : '';
     image.src = firstImage || item.imageUrl || '../assets/img/item-default.svg';
-    image.alt = item.imageAlt || t('Imagem de {title}', { title: item.title });
+    image.alt = item.imageAlt || traduzir('Imagem de {title}', { title: item.title });
 }
 
-function formatCountdown(endsAt) {
+function formatarContagemRegressiva(endsAt) {
     const remaining = new Date(endsAt).getTime() - Date.now();
-    if (!Number.isFinite(remaining) || remaining <= 0) return t('Leilão encerrado');
+    if (!Number.isFinite(remaining) || remaining <= 0) return traduzir('Leilão encerrado');
 
     const totalSeconds = Math.floor(remaining / 1000);
     const days = Math.floor(totalSeconds / 86400);
@@ -58,86 +61,86 @@ function formatCountdown(endsAt) {
     const minutes = Math.floor((totalSeconds % 3600) / 60);
     const seconds = totalSeconds % 60;
 
-    return t('Encerra em {days}d {hours}h {minutes}min {seconds}s', {
+    return traduzir('Encerra em {days}d {hours}h {minutes}min {seconds}s', {
         days, hours, minutes, seconds
     });
 }
 
-function stopCountdown() {
+function pararContagemRegressiva() {
     if (!countdownTimer) return;
     window.clearInterval(countdownTimer);
     countdownTimer = null;
 }
 
-function updateCountdown() {
+function atualizarContagemRegressiva() {
     const countdown = document.getElementById('details-countdown');
     if (!auction?.endsAt || !countdown) return;
 
     const expired = new Date(auction.endsAt).getTime() <= Date.now();
-    if (expired && !isAuctionClosed(auction.status)) {
+    if (expired && !verificarLeilaoEncerrado(auction.status)) {
         auction.status = 'FINALIZADO';
-        setText('details-price-label', t('Lance final'));
-        renderActions(auction);
+        definirTexto('details-price-label', traduzir('Lance final'));
+        renderizarAcoes(auction);
     }
 
-    countdown.textContent = isAuctionClosed(auction.status)
-        ? t('Leilão encerrado')
-        : formatCountdown(auction.endsAt);
+    countdown.textContent = verificarLeilaoEncerrado(auction.status)
+        ? traduzir('Leilão encerrado')
+        : formatarContagemRegressiva(auction.endsAt);
 
-    if (expired) stopCountdown();
+    if (expired) pararContagemRegressiva();
 }
 
-function startCountdown(item) {
-    stopCountdown();
-    updateCountdown();
-    if (!isAuctionClosed(item.status) && item.endsAt) {
-        countdownTimer = window.setInterval(updateCountdown, 1000);
+function iniciarContagemRegressiva(item) {
+    pararContagemRegressiva();
+    atualizarContagemRegressiva();
+    if (!verificarLeilaoEncerrado(item.status) && item.endsAt) {
+        countdownTimer = window.setInterval(atualizarContagemRegressiva, 1000);
     }
 }
 
-function getCurrentBid(item) {
+function obterLanceAtual(item) {
     return Number(item.currentBid ?? item.startingBid ?? 0);
 }
 
-function updateBidMinimum(item) {
-    const currentBid = getCurrentBid(item);
+function atualizarLanceMinimo(item) {
+    const currentBid = obterLanceAtual(item);
     bidInput.min = String(currentBid + 0.01);
-    bidMinimumHelp.textContent = t('O novo lance deve ser maior que {price}.', {
-        price: formatCurrency(currentBid)
+    bidMinimumHelp.textContent = traduzir('O novo lance deve ser maior que {price}.', {
+        price: formatarMoeda(currentBid)
     });
 }
 
-function openBuyNowConfirmation(item, button) {
-    buyNowMessage.textContent = t(
+function abrirConfirmacaoCompraImediata(item, button) {
+    buyNowMessage.textContent = traduzir(
         'Ao confirmar a compra por {price}, o leilão será encerrado e você será direcionado ao checkout.',
-        { price: formatCurrency(item.buyNowPrice) }
+        { price: formatarMoeda(item.buyNowPrice) }
     );
-    openDialog(buyNowDialog, button);
+    abrirDialogo(buyNowDialog, button);
 }
 
-function createBuyNowButton(item) {
-    const button = createElement('button', {
+function criarBotaoCompraImediata(item) {
+    const button = criarElemento('button', {
         className: 'btn-primary buy-now-button',
-        text: t('Comprar Agora por {price}', { price: formatCurrency(item.buyNowPrice) }),
+        text: traduzir('Comprar Agora por {price}', { price: formatarMoeda(item.buyNowPrice) }),
         attrs: { type: 'button' }
     });
-    button.addEventListener('click', () => openBuyNowConfirmation(item, button));
+    button.addEventListener('click', () => abrirConfirmacaoCompraImediata(item, button));
     return button;
 }
 
-function renderActions(item) {
+function renderizarAcoes(item) {
     ownerReadOnlyMessage.hidden = !ownerView;
-    if (isAuctionClosed(item.status) || ownerView) {
+    if (verificarLeilaoEncerrado(item.status) || ownerView) {
         bidSection.hidden = true;
         buyNowInfo.hidden = true;
         buyNowContainer.hidden = true;
-        clearElement(buyNowContainer);
+        limparElemento(buyNowContainer);
         return;
     }
 
     bidSection.hidden = false;
-    updateBidMinimum(item);
-    clearElement(buyNowContainer);
+    atualizarLanceMinimo(item);
+    limparElemento(buyNowContainer);
 
     const hasBuyNow = Number(item.buyNowPrice) > 0;
     buyNowContainer.hidden = !hasBuyNow;
@@ -145,57 +148,103 @@ function renderActions(item) {
 
     if (!hasBuyNow) return;
 
-    buyNowContainer.appendChild(createBuyNowButton(item));
-    buyNowInfo.textContent = t(
+    buyNowContainer.appendChild(criarBotaoCompraImediata(item));
+    buyNowInfo.textContent = traduzir(
         'Compra imediata disponível por {price}. Essa opção encerra o leilão na hora.',
-        { price: formatCurrency(item.buyNowPrice) }
+        { price: formatarMoeda(item.buyNowPrice) }
     );
 }
 
-function renderAuction(item) {
-    renderMainImage(item);
-    setText('details-category', t(item.category));
-    setText('details-title', item.title);
-    setText('details-description', item.description);
-    setText('details-condition', t(item.condition));
-    setText('details-rarity', item.rarity ? t(item.rarity) : t('Não informada'));
-    setText('details-ends-at', formatDateTime(item.endsAt));
-    setText('details-brand', item.brand || t('Não informada'));
-    setText('details-price-label', t(isAuctionClosed(item.status) ? 'Lance final' : 'Lance atual'));
-    setText('details-price', formatCurrency(getCurrentBid(item)));
-    renderActions(item);
-    startCountdown(item);
-    content.hidden = false;
-    clearElement(state);
+function adicionarCampoVencedor(label, value, href = '') {
+    if (!value) return;
+
+    const field = criarElemento('div');
+    const description = criarElemento('dd');
+    const content = href
+        ? criarElemento('a', { text: value, attrs: { href } })
+        : document.createTextNode(value);
+
+    description.appendChild(content);
+    field.append(
+        criarElemento('dt', { text: traduzir(label) }),
+        description
+    );
+    winnerContact.appendChild(field);
 }
 
-function renderBidItem(bid, index, total) {
-    const item = createElement('article', { className: 'bid-history-item' });
-    const info = createElement('div', { className: 'bid-history-info' });
+function renderizarVencedor(item) {
+    winnerSection.hidden = true;
+    withoutWinnerMessage.hidden = true;
+    limparElemento(winnerContact);
+
+    if (!verificarAutenticacao() || !ownerView || !verificarLeilaoFinalizado(item.status)) return;
+
+    winnerSection.hidden = false;
+    const winner = item.winner;
+    const hasWinner = Boolean(winner && (
+        winner.id !== undefined || winner.name || winner.email || winner.phone
+    ));
+
+    if (!hasWinner) {
+        withoutWinnerMessage.hidden = false;
+        return;
+    }
+
+    const name = String(winner.name || '').trim();
+    const email = String(winner.email || '').trim();
+    const phoneDigits = obterDigitosTelefone(winner.phone);
+    const phone = formatarTelefoneBrasileiro(phoneDigits);
+
+    adicionarCampoVencedor('Nome', name);
+    adicionarCampoVencedor('Telefone', phone, phoneDigits ? `tel:${phoneDigits}` : '');
+    adicionarCampoVencedor('E-mail', email, email ? `mailto:${email}` : '');
+}
+
+function renderizarLeilao(item) {
+    renderizarImagemPrincipal(item);
+    definirTexto('details-category', traduzir(item.category));
+    definirTexto('details-title', item.title);
+    definirTexto('details-description', item.description);
+    definirTexto('details-condition', traduzir(item.condition));
+    definirTexto('details-rarity', item.rarity ? traduzir(item.rarity) : traduzir('Não informada'));
+    definirTexto('details-ends-at', formatarDataHora(item.endsAt));
+    definirTexto('details-brand', item.brand || traduzir('Não informada'));
+    definirTexto('details-price-label', traduzir(verificarLeilaoEncerrado(item.status) ? 'Lance final' : 'Lance atual'));
+    definirTexto('details-price', formatarMoeda(obterLanceAtual(item)));
+    renderizarAcoes(item);
+    renderizarVencedor(item);
+    iniciarContagemRegressiva(item);
+    content.hidden = false;
+    limparElemento(state);
+}
+
+function criarItemHistoricoLance(bid, index, total) {
+    const item = criarElemento('article', { className: 'bid-history-item' });
+    const info = criarElemento('div', { className: 'bid-history-info' });
     const position = total - index;
 
     info.append(
-        createElement('strong', { text: t('Lance #{number}', { number: position }) }),
-        createElement('time', {
-            text: formatDateTime(bid.createdAt),
+        criarElemento('strong', { text: traduzir('Lance #{number}', { number: position }) }),
+        criarElemento('time', {
+            text: formatarDataHora(bid.createdAt),
             attrs: { datetime: bid.createdAt || '' }
         })
     );
 
     item.append(
         info,
-        createElement('strong', {
+        criarElemento('strong', {
             className: 'bid-history-value',
-            text: formatCurrency(bid.amount)
+            text: formatarMoeda(bid.amount)
         })
     );
     return item;
 }
 
-function renderBidHistoryItems(bids) {
-    clearElement(bidHistory);
+function renderizarHistoricoLances(bids) {
+    limparElemento(bidHistory);
     if (!bids.length) {
-        renderState(bidHistory, 'empty', t('Este item ainda não recebeu lances.'));
+        renderizarEstado(bidHistory, 'empty', traduzir('Este item ainda não recebeu lances.'));
         return;
     }
 
@@ -203,70 +252,70 @@ function renderBidHistoryItems(bids) {
         (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
     );
     sorted.forEach((bid, index) => {
-        bidHistory.appendChild(renderBidItem(bid, index, sorted.length));
+        bidHistory.appendChild(criarItemHistoricoLance(bid, index, sorted.length));
     });
 }
 
-async function loadBidHistory() {
+async function carregarHistoricoLances() {
     if (!auctionId) return;
-    renderState(bidHistory, 'loading', t('Carregando histórico de lances...'));
+    renderizarEstado(bidHistory, 'loading', traduzir('Carregando histórico de lances...'));
 
     try {
-        renderBidHistoryItems(normalizeCollection(await getBidHistory(auctionId)));
+        renderizarHistoricoLances(normalizarColecao(await obterHistoricoLances(auctionId)));
     } catch (error) {
-        renderState(bidHistory, 'error', getUserErrorMessage(
+        renderizarEstado(bidHistory, 'error', obterMensagemErroUsuario(
             error,
-            t('Não conseguimos carregar o histórico de lances agora. Tente novamente em instantes.')
+            traduzir('Não conseguimos carregar o histórico de lances agora. Tente novamente em instantes.')
         ));
     }
 }
 
-function validateBid() {
-    const valid = validatePositiveNumber(
+function validarLance() {
+    const valid = validarNumeroPositivo(
         bidInput,
         'O lance',
-        getCurrentBid(auction)
+        obterLanceAtual(auction)
     );
-    if (valid) clearFieldError(bidInput);
+    if (valid) limparErroCampo(bidInput);
     return valid;
 }
 
-function requestBidConfirmation(event) {
+function solicitarConfirmacaoLance(event) {
     event.preventDefault();
     if (ownerView) return;
-    if (!validateBid()) return;
+    if (!validarLance()) return;
 
     pendingBid = Number(bidInput.value);
-    confirmMessage.textContent = t(
+    confirmMessage.textContent = traduzir(
         'Você confirma o lance de {amount} em {title}?',
-        { amount: formatCurrency(pendingBid), title: auction.title }
+        { amount: formatarMoeda(pendingBid), title: auction.title }
     );
-    openDialog(confirmDialog, bidForm.querySelector('[type="submit"]'));
+    abrirDialogo(confirmDialog, bidForm.querySelector('[type="submit"]'));
 }
 
-function applyBidUpdate(updated) {
+function aplicarAtualizacaoLance(updated) {
     auction = updated?.auction || { ...auction, currentBid: pendingBid };
-    setText('details-price', formatCurrency(getCurrentBid(auction)));
-    updateBidMinimum(auction);
+    definirTexto('details-price', formatarMoeda(obterLanceAtual(auction)));
+    atualizarLanceMinimo(auction);
     bidInput.value = '';
 }
 
-async function confirmBid() {
+async function confirmarLance() {
     if (ownerView || !pendingBid) return;
 
     confirmButton.disabled = true;
-    setLiveMessage(actionStatus, t('Enviando lance...'));
+    definirMensagemAoVivo(actionStatus, traduzir('Enviando lance...'));
 
     try {
-        applyBidUpdate(await placeBid(auctionId, pendingBid));
-        closeDialog(confirmDialog);
-        setLiveMessage(actionStatus, t('Lance registrado com sucesso.'));
-        await loadBidHistory();
+        aplicarAtualizacaoLance(await enviarLance(auctionId, pendingBid));
+        fecharDialogo(confirmDialog);
+        definirMensagemAoVivo(actionStatus, traduzir('Lance registrado com sucesso.'));
+        await carregarHistoricoLances();
     } catch (error) {
-        closeDialog(confirmDialog);
-        setLiveMessage(actionStatus, getUserErrorMessage(
+        fecharDialogo(confirmDialog);
+        definirMensagemAoVivo(actionStatus, obterMensagemErroUsuario(
             error,
-            t('Não conseguimos registrar seu lance agora. Confira o valor e tente novamente.')
+            traduzir('Não conseguimos registrar seu lance agora. Confira o valor e tente novamente.')
         ), true);
     } finally {
         pendingBid = null;
@@ -274,68 +323,67 @@ async function confirmBid() {
     }
 }
 
-async function confirmBuyNow() {
+async function confirmarCompraImediata() {
     if (ownerView || !auction?.buyNowPrice) return;
 
     buyNowConfirmButton.disabled = true;
-    setLiveMessage(actionStatus, t('Confirmando Compra Imediata...'));
+    definirMensagemAoVivo(actionStatus, traduzir('Confirmando Compra Imediata...'));
 
     try {
-        await buyNowAuction(auctionId);
-        closeDialog(buyNowDialog);
+        await comprarLeilaoAgora(auctionId);
+        fecharDialogo(buyNowDialog);
         window.location.href = `checkout.html?auctionId=${encodeURIComponent(auctionId)}&source=buy-now`;
     } catch (error) {
-        closeDialog(buyNowDialog);
-        setLiveMessage(actionStatus, getUserErrorMessage(
+        fecharDialogo(buyNowDialog);
+        definirMensagemAoVivo(actionStatus, obterMensagemErroUsuario(
             error,
-            t('Não conseguimos concluir a Compra Imediata agora. Atualize a página e tente novamente.')
+            traduzir('Não conseguimos concluir a Compra Imediata agora. Atualize a página e tente novamente.')
         ), true);
     } finally {
         buyNowConfirmButton.disabled = false;
     }
 }
 
-async function resolveOwnerView(item) {
-    if (ownerModeFromQuery) return true;
-    if (!isAuthenticated() || item.ownerId === undefined || item.ownerId === null) return false;
+async function verificarSeUsuarioLeiloeiro(item) {
+    if (!verificarAutenticacao() || item.ownerId === undefined || item.ownerId === null) return false;
 
     try {
-        const profile = await getProfile();
+        const profile = await obterPerfil();
         return String(profile.id) === String(item.ownerId);
     } catch {
         return false;
     }
 }
 
-async function loadAuction() {
+async function carregarLeilao() {
     if (!auctionId) {
-        renderState(
+        renderizarEstado(
             state,
             'error',
-            t('Não encontramos o item solicitado. Volte ao catálogo e escolha um leilão.')
+            traduzir('Não encontramos o item solicitado. Volte ao catálogo e escolha um leilão.')
         );
         return;
     }
 
-    renderState(state, 'loading', t('Carregando detalhes do item...'));
+    renderizarEstado(state, 'loading', traduzir('Carregando detalhes do item...'));
     try {
-        auction = await getAuctionById(auctionId);
-        ownerView = await resolveOwnerView(auction);
-        renderAuction(auction);
-        await loadBidHistory();
+        auction = await obterLeilaoPorId(auctionId);
+        ownerView = await verificarSeUsuarioLeiloeiro(auction);
+        renderizarLeilao(auction);
+        await carregarHistoricoLances();
     } catch (error) {
-        renderState(state, 'error', getUserErrorMessage(
+        renderizarEstado(state, 'error', obterMensagemErroUsuario(
             error,
-            t('Não conseguimos carregar os detalhes deste item agora. Tente novamente em instantes.')
+            traduzir('Não conseguimos carregar os detalhes deste item agora. Tente novamente em instantes.')
         ));
     }
 }
 
-initDialog(confirmDialog);
-initDialog(buyNowDialog);
-bidForm.addEventListener('submit', requestBidConfirmation);
-bidInput.addEventListener('input', () => clearFieldError(bidInput));
-confirmButton.addEventListener('click', confirmBid);
-buyNowConfirmButton.addEventListener('click', confirmBuyNow);
-window.addEventListener('pagehide', stopCountdown);
-loadAuction();
+inicializarDialogo(confirmDialog);
+inicializarDialogo(buyNowDialog);
+bidForm.addEventListener('submit', solicitarConfirmacaoLance);
+bidInput.addEventListener('input', () => limparErroCampo(bidInput));
+confirmButton.addEventListener('click', confirmarLance);
+buyNowConfirmButton.addEventListener('click', confirmarCompraImediata);
+window.addEventListener('pagehide', pararContagemRegressiva);
+carregarLeilao();

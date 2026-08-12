@@ -1,11 +1,11 @@
-import { clearFieldError, focusFirstInvalid, setFieldError, validateEmail, validateRequired } from '../components/formValidation.js';
-import { clearElement, createElement, formatCurrency } from '../components/dom.js';
-import { getUserErrorMessage, UserFacingError } from '../components/userError.js';
-import { renderState, setLiveMessage } from '../components/statusMessage.js';
-import { getAuctionById } from '../services/auctionService.js';
-import { clearCart, getCart, getCartTotal } from '../services/cartService.js';
-import { checkoutCart, checkoutWonAuction } from '../services/orderService.js';
-import { t } from '../services/i18n.js';
+import { limparErroCampo, focarPrimeiroCampoInvalido, definirErroCampo, validarEmail, validarCampoObrigatorio } from '../components/formValidation.js';
+import { limparElemento, criarElemento, formatarMoeda } from '../components/dom.js';
+import { obterMensagemErroUsuario, UserFacingError } from '../components/userError.js';
+import { renderizarEstado, definirMensagemAoVivo } from '../components/statusMessage.js';
+import { obterLeilaoPorId } from '../services/auctionService.js';
+import { limparCarrinho, obterCarrinho, obterTotalCarrinho } from '../services/cartService.js';
+import { finalizarCompraCarrinho, finalizarCompraLeilaoVencido } from '../services/orderService.js';
+import { traduzir } from '../services/i18n.js';
 
 const auctionId = new URLSearchParams(window.location.search).get('auctionId');
 const state = document.getElementById('checkout-state');
@@ -24,78 +24,78 @@ const requiredFields = [
     ['checkout-card-name', 'Nome no cartão'], ['checkout-card-number', 'Número do cartão fictício'], ['checkout-expiry', 'Validade']
 ];
 
-function validateCardNumber(field) {
+function validarNumeroCartao(field) {
     const digits = field.value.replace(/\D/g, '');
     const valid = digits.length >= 12;
-    if (!valid) setFieldError(field, t('Use um número fictício com pelo menos 12 dígitos.'));
-    else clearFieldError(field);
+    if (!valid) definirErroCampo(field, traduzir('Use um número fictício com pelo menos 12 dígitos.'));
+    else limparErroCampo(field);
     return valid;
 }
 
-function validateExpiry(field) {
+function validarValidadeCartao(field) {
     const valid = /^(0[1-9]|1[0-2])\/\d{2}$/.test(field.value.trim());
-    if (!valid) setFieldError(field, t('Use o formato MM/AA.'));
-    else clearFieldError(field);
+    if (!valid) definirErroCampo(field, traduzir('Use o formato MM/AA.'));
+    else limparErroCampo(field);
     return valid;
 }
 
-function validateForm() {
+function validarFormularioPagamento() {
     let valid = true;
     requiredFields.forEach(([id, label]) => {
-        if (!validateRequired(document.getElementById(id), label)) valid = false;
+        if (!validarCampoObrigatorio(document.getElementById(id), label)) valid = false;
     });
-    if (!validateEmail(document.getElementById('checkout-email'))) valid = false;
-    if (!validateCardNumber(document.getElementById('checkout-card-number'))) valid = false;
-    if (!validateExpiry(document.getElementById('checkout-expiry'))) valid = false;
-    if (!valid) focusFirstInvalid(form);
+    if (!validarEmail(document.getElementById('checkout-email'))) valid = false;
+    if (!validarNumeroCartao(document.getElementById('checkout-card-number'))) valid = false;
+    if (!validarValidadeCartao(document.getElementById('checkout-expiry'))) valid = false;
+    if (!valid) focarPrimeiroCampoInvalido(form);
     return valid;
 }
 
-function renderSummary() {
-    clearElement(summaryList);
+function renderizarResumoPagamento() {
+    limparElemento(summaryList);
     checkoutItems.forEach((item) => {
-        const row = createElement('div', { className: 'checkout-summary-item' });
+        const row = criarElemento('div', { className: 'checkout-summary-item' });
         row.append(
-            createElement('span', { text: `${t(item.title)}${item.quantity ? ` × ${item.quantity}` : ''}` }),
-            createElement('span', { text: formatCurrency(Number(item.price) * (item.quantity || 1)) })
+            criarElemento('span', { text: `${traduzir(item.title)}${item.quantity ? ` × ${item.quantity}` : ''}` }),
+            criarElemento('span', { text: formatarMoeda(Number(item.price) * (item.quantity || 1)) })
         );
         summaryList.appendChild(row);
     });
-    totalElement.textContent = formatCurrency(checkoutTotal);
+    totalElement.textContent = formatarMoeda(checkoutTotal);
 }
 
-async function prepareAuctionCheckout() {
-    document.getElementById('checkout-title').textContent = t('Finalizar item arrematado');
-    document.getElementById('checkout-description').textContent = t('Finalize o pagamento fictício do item que você venceu.');
-    const auction = await getAuctionById(auctionId);
-    if (!auction.canCheckout) throw new UserFacingError(t('Este item ainda não está disponível para pagamento nesta conta.'));
+async function prepararPagamentoLeilao() {
+    document.getElementById('checkout-title').textContent = traduzir('Finalizar item arrematado');
+    document.getElementById('checkout-description').textContent = traduzir('Finalize o pagamento fictício do item que você venceu.');
+    const auction = await obterLeilaoPorId(auctionId);
+    if (!auction.canCheckout) throw new UserFacingError(traduzir('Este item ainda não está disponível para pagamento nesta conta.'));
     const price = Number(auction.finalPrice ?? auction.finalBid ?? auction.buyNowPrice ?? auction.currentBid ?? 0);
     checkoutItems = [{ id: auction.id, type: 'AUCTION', title: auction.title, price, quantity: 1 }];
     checkoutTotal = price;
 }
 
-function prepareCartCheckout() {
-    document.getElementById('checkout-title').textContent = t('Finalizar compra da Loja Oficial Midas');
-    document.getElementById('checkout-description').textContent = t('Confira os produtos da Loja Oficial Midas e preencha os dados. O checkout é acadêmico e não realiza cobrança real.');
-    checkoutItems = getCart();
-    if (!checkoutItems.length) throw new UserFacingError(t('Seu carrinho está vazio. Escolha um produto da Loja Oficial Midas antes de continuar.'));
-    checkoutTotal = getCartTotal(checkoutItems);
+function prepararPagamentoCarrinho() {
+    document.getElementById('checkout-title').textContent = traduzir('Finalizar compra da Loja Oficial Midas');
+    document.getElementById('checkout-description').textContent = traduzir('Confira os produtos da Loja Oficial Midas e preencha os dados. O checkout é acadêmico e não realiza cobrança real.');
+    checkoutItems = obterCarrinho();
+    if (!checkoutItems.length) throw new UserFacingError(traduzir('Seu carrinho está vazio. Escolha um produto da Loja Oficial Midas antes de continuar.'));
+    checkoutTotal = obterTotalCarrinho(checkoutItems);
 }
 
-async function prepareCheckout() {
-    renderState(state, 'loading', t('Preparando checkout...'));
+async function prepararPagamento() {
+    renderizarEstado(state, 'loading', traduzir('Preparando checkout...'));
     try {
-        if (auctionId) await prepareAuctionCheckout();
-        else prepareCartCheckout();
-        renderSummary();
+        if (auctionId) await prepararPagamentoLeilao();
+        else prepararPagamentoCarrinho();
+        renderizarResumoPagamento();
         state.textContent = '';
         content.hidden = false;
     } catch (error) {
-        renderState(state, 'error', getUserErrorMessage(error, t('Não conseguimos preparar o checkout agora. Tente novamente em instantes.')));
+        renderizarEstado(state, 'error', obterMensagemErroUsuario(error, traduzir('Não conseguimos preparar o checkout agora. Tente novamente em instantes.')));
     }
 }
 
-function buildCheckoutPayload() {
+function criarDadosPagamento() {
     const data = Object.fromEntries(new FormData(form));
     return {
         customer: {
@@ -111,38 +111,38 @@ function buildCheckoutPayload() {
     };
 }
 
-function showSuccess(order) {
+function exibirConfirmacaoCompra(order) {
     content.hidden = true;
     successSection.hidden = false;
-    const code = order?.orderNumber || order?.id || t('confirmado');
+    const code = order?.orderNumber || order?.id || traduzir('confirmado');
     const message = auctionId
-        ? t('Pagamento do item confirmado. Pedido {code} registrado sem cobrança real.', { code })
-        : t('Compra da Loja Oficial Midas confirmada. Pedido {code} registrado sem cobrança real.', { code });
+        ? traduzir('Pagamento do item confirmado. Pedido {code} registrado sem cobrança real.', { code })
+        : traduzir('Compra da Loja Oficial Midas confirmada. Pedido {code} registrado sem cobrança real.', { code });
     document.getElementById('checkout-success-message').textContent = message;
     successSection.focus();
 }
 
-async function handleSubmit(event) {
+async function finalizarPagamento(event) {
     event.preventDefault();
-    if (!validateForm()) return;
+    if (!validarFormularioPagamento()) return;
     const submitButton = form.querySelector('[type="submit"]');
     submitButton.disabled = true;
-    setLiveMessage(status, t('Confirmando compra...'));
+    definirMensagemAoVivo(status, traduzir('Confirmando compra...'));
     try {
-        const payload = buildCheckoutPayload();
-        const order = auctionId ? await checkoutWonAuction(auctionId, payload) : await checkoutCart(payload);
-        if (!auctionId) clearCart();
-        setLiveMessage(status, t('Compra confirmada.'));
-        showSuccess(order);
+        const payload = criarDadosPagamento();
+        const order = auctionId ? await finalizarCompraLeilaoVencido(auctionId, payload) : await finalizarCompraCarrinho(payload);
+        if (!auctionId) limparCarrinho();
+        definirMensagemAoVivo(status, traduzir('Compra confirmada.'));
+        exibirConfirmacaoCompra(order);
     } catch (error) {
-        setLiveMessage(status, getUserErrorMessage(error, t('Não conseguimos confirmar a compra agora. Revise os dados e tente novamente.')), true);
+        definirMensagemAoVivo(status, obterMensagemErroUsuario(error, traduzir('Não conseguimos confirmar a compra agora. Revise os dados e tente novamente.')), true);
     } finally {
         submitButton.disabled = false;
     }
 }
 
 requiredFields.forEach(([id]) => {
-    document.getElementById(id).addEventListener('input', (event) => clearFieldError(event.currentTarget));
+    document.getElementById(id).addEventListener('input', (event) => limparErroCampo(event.currentTarget));
 });
-form.addEventListener('submit', handleSubmit);
-prepareCheckout();
+form.addEventListener('submit', finalizarPagamento);
+prepararPagamento();

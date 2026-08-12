@@ -1,38 +1,57 @@
-import { clearFieldError, focusFirstInvalid, validateEmail, validateRequired } from '../components/formValidation.js';
-import { setLiveMessage } from '../components/statusMessage.js';
-import { getUserErrorMessage } from '../components/userError.js';
-import { login } from '../services/authService.js';
-import { t } from '../services/i18n.js';
+import { limparErroCampo, focarPrimeiroCampoInvalido, validarEmail, validarCampoObrigatorio } from '../components/formValidation.js';
+import { definirMensagemAoVivo } from '../components/statusMessage.js';
+import { obterMensagemErroUsuario } from '../components/userError.js';
+import { autenticarUsuario } from '../services/authService.js';
+import { traduzir } from '../services/i18n.js';
 
 const form = document.getElementById('login-form');
 const email = document.getElementById('login-email');
 const password = document.getElementById('login-password');
 const status = document.getElementById('login-status');
 
-function validateForm() {
-    const emailValid = validateRequired(email, t('E-mail')) && validateEmail(email);
-    const passwordValid = validateRequired(password, t('Senha'));
-    if (!emailValid || !passwordValid) focusFirstInvalid(form);
+function obterDestinoRedirecionamento() {
+    const redirect = new URLSearchParams(window.location.search).get('redirect');
+    if (!redirect) return 'perfil.html';
+
+    const allowedPages = new Set(['perfil.html', 'meus-leiloes.html', 'criar-leilao.html']);
+    try {
+        const target = new URL(redirect, window.location.href);
+        const page = target.pathname.split('/').pop();
+        const currentDirectory = window.location.pathname.slice(0, window.location.pathname.lastIndexOf('/') + 1);
+        const targetDirectory = target.pathname.slice(0, target.pathname.lastIndexOf('/') + 1);
+        if (target.origin !== window.location.origin || targetDirectory !== currentDirectory || !allowedPages.has(page)) {
+            return 'perfil.html';
+        }
+        return `${page}${target.search}${target.hash}`;
+    } catch {
+        return 'perfil.html';
+    }
+}
+
+function validarFormularioLogin() {
+    const emailValid = validarCampoObrigatorio(email, traduzir('E-mail')) && validarEmail(email);
+    const passwordValid = validarCampoObrigatorio(password, traduzir('Senha'));
+    if (!emailValid || !passwordValid) focarPrimeiroCampoInvalido(form);
     return emailValid && passwordValid;
 }
 
-async function handleSubmit(event) {
+async function entrarNaConta(event) {
     event.preventDefault();
-    if (!validateForm()) return;
+    if (!validarFormularioLogin()) return;
     const submitButton = form.querySelector('[type="submit"]');
     submitButton.disabled = true;
-    setLiveMessage(status, t('Entrando...'));
+    definirMensagemAoVivo(status, traduzir('Entrando...'));
     try {
-        await login({ email: email.value.trim(), password: password.value });
-        setLiveMessage(status, t('Login realizado. Redirecionando...'));
-        window.location.href = 'perfil.html';
+        await autenticarUsuario({ email: email.value.trim(), password: password.value });
+        definirMensagemAoVivo(status, traduzir('Login realizado. Redirecionando...'));
+        window.location.href = obterDestinoRedirecionamento();
     } catch (error) {
-        setLiveMessage(status, getUserErrorMessage(error, t('Não conseguimos entrar na sua conta agora. Confira seus dados e tente novamente.')), true);
+        definirMensagemAoVivo(status, obterMensagemErroUsuario(error, traduzir('Não conseguimos entrar na sua conta agora. Confira seus dados e tente novamente.')), true);
     } finally {
         submitButton.disabled = false;
     }
 }
 
-email.addEventListener('input', () => clearFieldError(email));
-password.addEventListener('input', () => clearFieldError(password));
-form.addEventListener('submit', handleSubmit);
+email.addEventListener('input', () => limparErroCampo(email));
+password.addEventListener('input', () => limparErroCampo(password));
+form.addEventListener('submit', entrarNaConta);

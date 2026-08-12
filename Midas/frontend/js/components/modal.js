@@ -1,22 +1,22 @@
-import { createElement } from './dom.js';
-import { createIcon } from './icons.js';
+import { criarElemento } from './dom.js';
+import { criarIcone } from './icons.js';
 
 const triggerByDialog = new WeakMap();
 const FOCUSABLE_SELECTOR = 'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
-function restoreFocus(dialog) {
+function restaurarFoco(dialog) {
     const trigger = triggerByDialog.get(dialog);
     if (trigger instanceof HTMLElement && document.contains(trigger)) trigger.focus();
     triggerByDialog.delete(dialog);
 }
 
-function getFocusableElements(dialog) {
+function obterElementosFocaveis(dialog) {
     return [...dialog.querySelectorAll(FOCUSABLE_SELECTOR)].filter((element) => !element.hidden && element.getClientRects().length > 0);
 }
 
-function trapFocus(event, dialog) {
+function manterFocoNoDialogo(event, dialog) {
     if (event.key !== 'Tab') return;
-    const focusable = getFocusableElements(dialog);
+    const focusable = obterElementosFocaveis(dialog);
     if (!focusable.length) {
         event.preventDefault();
         dialog.focus();
@@ -33,7 +33,7 @@ function trapFocus(event, dialog) {
     }
 }
 
-function ensureSurface(dialog) {
+function garantirSuperficieDialogo(dialog) {
     let surface = dialog.querySelector(':scope > .dialog-surface');
     if (surface) return surface;
     surface = document.createElement('div');
@@ -44,40 +44,40 @@ function ensureSurface(dialog) {
     return surface;
 }
 
-export function openDialog(dialog, trigger = document.activeElement) {
+export function abrirDialogo(dialog, trigger = document.activeElement) {
     if (!dialog || typeof dialog.showModal !== 'function') return;
     triggerByDialog.set(dialog, trigger instanceof HTMLElement ? trigger : null);
     dialog.showModal();
-    const firstFocusable = getFocusableElements(dialog)[0];
+    const firstFocusable = obterElementosFocaveis(dialog)[0];
     (firstFocusable || dialog).focus();
 }
 
-export function closeDialog(dialog) {
+export function fecharDialogo(dialog) {
     if (dialog?.open) dialog.close();
 }
 
-export function initDialog(dialog) {
+export function inicializarDialogo(dialog) {
     if (!dialog) return;
-    ensureSurface(dialog);
+    garantirSuperficieDialogo(dialog);
     dialog.setAttribute('tabindex', '-1');
     dialog.setAttribute('aria-modal', 'true');
-    dialog.addEventListener('close', () => restoreFocus(dialog));
+    dialog.addEventListener('close', () => restaurarFoco(dialog));
     dialog.addEventListener('click', (event) => {
-        if (event.target === dialog) closeDialog(dialog);
+        if (event.target === dialog) fecharDialogo(dialog);
     });
-    dialog.addEventListener('keydown', (event) => trapFocus(event, dialog));
+    dialog.addEventListener('keydown', (event) => manterFocoNoDialogo(event, dialog));
     dialog.querySelectorAll('[data-dialog-close]').forEach((button) => {
-        button.addEventListener('click', () => closeDialog(dialog));
+        button.addEventListener('click', () => fecharDialogo(dialog));
     });
 }
 
 
-export function createDialogCloseButton(label) {
-    const button = createElement('button', {
+export function criarBotaoFecharDialogo(label) {
+    const button = criarElemento('button', {
         className: 'dialog-close-button',
         attrs: { type: 'button', 'aria-label': label },
         dataset: { dialogClose: 'true' }
     });
-    button.appendChild(createIcon('x'));
+    button.appendChild(criarIcone('x'));
     return button;
 }

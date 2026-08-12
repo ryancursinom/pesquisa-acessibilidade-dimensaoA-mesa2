@@ -168,6 +168,10 @@ body.dark-page {
     background: var(--bg-dark);
 }
 
+body[data-private-page] {
+    visibility: hidden;
+}
+
 button,
 input,
 select,

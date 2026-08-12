@@ -1,6 +1,6 @@
 const CART_KEY = 'midas-cart';
 
-function readCart() {
+function lerCarrinho() {
     try {
         return JSON.parse(sessionStorage.getItem(CART_KEY)) || [];
     } catch {
@@ -8,49 +8,49 @@ function readCart() {
     }
 }
 
-function writeCart(items) {
+function salvarCarrinho(items) {
     sessionStorage.setItem(CART_KEY, JSON.stringify(items));
     window.dispatchEvent(new CustomEvent('midas:cart-updated', { detail: items }));
 }
 
-export function getCart() {
-    return readCart();
+export function obterCarrinho() {
+    return lerCarrinho();
 }
 
-export function addToCart(product) {
-    const items = readCart();
+export function adicionarAoCarrinho(product) {
+    const items = lerCarrinho();
     const existing = items.find((item) => String(item.id) === String(product.id));
 
     if (existing) existing.quantity += 1;
     else items.push({ ...product, quantity: 1 });
 
-    writeCart(items);
+    salvarCarrinho(items);
     return items;
 }
 
-export function updateCartQuantity(id, quantity) {
+export function atualizarQuantidadeCarrinho(id, quantity) {
     const nextQuantity = Math.min(20, Math.max(1, Number(quantity) || 1));
-    const items = readCart().map((item) => (
+    const items = lerCarrinho().map((item) => (
         String(item.id) === String(id) ? { ...item, quantity: nextQuantity } : item
     ));
-    writeCart(items);
+    salvarCarrinho(items);
     return items;
 }
 
-export function removeFromCart(id) {
-    const items = readCart().filter((item) => String(item.id) !== String(id));
-    writeCart(items);
+export function removerDoCarrinho(id) {
+    const items = lerCarrinho().filter((item) => String(item.id) !== String(id));
+    salvarCarrinho(items);
     return items;
 }
 
-export function clearCart() {
-    writeCart([]);
+export function limparCarrinho() {
+    salvarCarrinho([]);
 }
 
-export function getCartTotal(items = readCart()) {
+export function obterTotalCarrinho(items = lerCarrinho()) {
     return items.reduce((total, item) => total + Number(item.price || 0) * item.quantity, 0);
 }
 
-export function getCartItemCount(items = readCart()) {
+export function obterQuantidadeItensCarrinho(items = lerCarrinho()) {
     return items.reduce((total, item) => total + item.quantity, 0);
 }
