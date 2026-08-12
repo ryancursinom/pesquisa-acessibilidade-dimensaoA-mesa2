@@ -23,11 +23,15 @@ public class ProdutoImagem {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_produto", nullable = false)
-    private Produto idProduto;
+    private Produto produto;
 
     @Column(length = 1024)
     private String url;
 
     @Column(name = "ordem")
     private Integer ordem;
+
+    @Column(name = "principal")
+    @Builder.Default
+    private Boolean principal = false;
 }

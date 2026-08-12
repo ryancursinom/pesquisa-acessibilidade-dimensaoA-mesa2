@@ -29,7 +29,7 @@ public class PedidoItem {
     @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_pedido", nullable = false)
-    private Carrinho carrinho;
+    private Pedido pedido;
 
     @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)

@@ -2,5 +2,6 @@ package com.example.midas_api.entity.enums;
 
 public enum TipoCompra {
     LEILAO,
-    COMPRA_IMEDIATA
+    COMPRA_IMEDIATA,
+    AMBOS
 }

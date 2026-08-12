@@ -32,6 +32,9 @@ public class Produto {
     @Column(nullable = false, length = 255)
     private String nome;
 
+    @Column(nullable = false, length = 1024)
+    private String urlImagem;
+
     private Integer anoFabricacao;
     private Integer anoLancamento;
 
