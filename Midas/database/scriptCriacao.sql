@@ -104,12 +104,9 @@ CREATE TABLE telefone (
         REFERENCES usuario(id)
         ON DELETE CASCADE,
  
-    telefone VARCHAR(20) NOT NULL,
- 
-    tipo tipo_telefone NOT NULL,
- 
-    principal BOOLEAN DEFAULT FALSE
+    telefone VARCHAR(20) NOT NULL
 );
+ 
  
 -- ==============================================================================
 -- 4. PRODUTO E IMAGENS
