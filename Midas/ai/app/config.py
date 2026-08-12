@@ -1,13 +1,29 @@
-from pydantic_settings import BaseSettings
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
-class Settings(BaseSettings):
-    app_name: str = "MIDAS AI"
-    gemini_api_key: str = ""
-    database_url: str = "sqlite:///./midas.db"
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-    class Config:
-        env_file = ".env"
+DB_HOST = os.getenv("DB_HOST")
+DB_PORT = os.getenv("DB_PORT", "5432")
+DB_NAME = os.getenv("DB_NAME")
+DB_USER = os.getenv("DB_USER")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
 
 
-settings = Settings()
+if not GEMINI_API_KEY:
+    raise RuntimeError("GEMINI_API_KEY não configurada.")
+
+if not DB_HOST:
+    raise RuntimeError("DB_HOST não configurado.")
+
+if not DB_NAME:
+    raise RuntimeError("DB_NAME não configurado.")
+
+if not DB_USER:
+    raise RuntimeError("DB_USER não configurado.")
+
+if not DB_PASSWORD:
+    raise RuntimeError("DB_PASSWORD não configurado.")
